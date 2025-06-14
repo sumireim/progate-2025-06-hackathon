@@ -1,0 +1,20 @@
+# Docker Compose file for a simple web application with a backend and frontend
+version: '3.8'
+services: # 起動するコンテナの定義
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app # リアルタイム開発用（PCの./backend フォルダ ⟷ コンテナの/app）
+      - ./data:/app/data # データ永続化用（PCの./data フォルダ ⟷ コンテナの/app/data）
+    environment:
+      - DATABASE_URL=sqlite:///./data/spots.db # コンテナ内の環境変数設定
+    
+  frontend:
+    image: nginx:alpine # 既存イメージ使用（ビルド不要）
+    ports:
+      - "3000:80" # ポート設定（PC:3000 ⟷ コンテナ内:80）
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+
