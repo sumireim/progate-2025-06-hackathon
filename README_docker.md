@@ -65,3 +65,8 @@ backend/
 ├── routers/         → /app/routers/
 └── tests/           → /app/tests/
 ```
+
+
+## backend/requirements.txt
+Pythonで必要なライブラリとそのバージョンのリスト
+
