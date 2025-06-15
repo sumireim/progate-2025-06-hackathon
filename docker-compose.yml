@@ -1,5 +1,5 @@
 # Docker Compose file for a simple web application with a backend and frontend
-version: '3.8'
+# version: '3.8'
 services: # 起動するコンテナの定義
   backend:
     build: ./backend
