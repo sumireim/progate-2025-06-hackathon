@@ -1,1 +1,160 @@
-<script src="js/api.js"></script>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>地域のおすすめ</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- ヘッダー -->
+    <header class="app-header">
+      <h1 class="app-title">
+        <img src="images/location-icon.png" alt="地域アイコン" class="title-icon" />
+        地域のおすすめ
+      </h1>
+      <nav>
+        <button id="btn-post" class="tab">投稿</button>
+        <button id="btn-search" class="tab">検索</button>
+        <button id="btn-menu" class="icon-btn">
+          <img src="images/user.png" alt="ユーザアイコン" />
+        </button>
+      </nav>
+    </header>
+
+    <!-- メイン -->
+    <main class="app-main">
+      <!-- 左：地図 -->
+      <section id="map" class="map-panel">
+        <div class="search-bar">
+          <img src="images/search-icon.png" alt="検索アイコン" class="search-icon" />
+          <input type="text" placeholder="絞り込み検索" />
+        </div>
+      </section>
+
+      <!-- 右：サイドバー -->
+      <aside class="sidebar">
+        <!-- あなたにおすすめ -->
+        <h2 class="section-title">あなたにおすすめ</h2>
+        <div class="card-section recommendations">
+          <div id="recommend-list" class="card-list">
+            <div class="card">
+              <img src="images/ramen_koguma.jpeg" alt="ラーメンこぐま"/>
+              <h3>ラーメンこぐま</h3>
+              <span class="category">ラーメン</span>
+              <div class="stars">★★★★</div>
+            </div>
+            <div class="card">
+              <img src="images/ramen_shirokuma.jpeg" alt="ラーメンしろくま"/>
+              <h3>ラーメンしろくま</h3>
+              <span class="category">ラーメン</span>
+              <div class="stars">★★★</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 投稿されたリアルタイム情報 -->
+        <h2 class="section-title">投稿されたリアルタイム情報</h2>
+        <div class="card-section realtime-posts">
+          <ul id="post-list">
+            <li>
+              <div class="user-icon"></div>
+              <div class="post-content">
+                <p>替え玉無料だった！</p>
+                <div class="post-time">1時間前</div>
+              </div>
+            </li>
+            <li>
+              <div class="user-icon"></div>
+              <div class="post-content">
+                <p>3時間並んだ！</p>
+                <div class="post-time">1時間前</div>
+              </div>
+            </li>
+            <li>
+              <div class="user-icon"></div>
+              <div class="post-content">
+                <p>こぐまラーメンの方が美味しかった！</p>
+                <div class="post-time">2時間前</div>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- 知り合いからの連絡 -->
+        <h2 class="section-title">知り合いからの連絡</h2>
+        <div class="card-section contacts">
+          <ul id="contact-list">
+            <li>
+              <div class="contact-icon"></div>
+              <div class="contact-content">
+                <p>8/1の新入生歓迎会はここでやります！</p>
+                <a href="https://maps.app.goo.gl/koguma-noodle">https://maps.app.goo.gl/koguma-noodle</a>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </aside>
+    </main>
+
+    <div id="user-menu-overlay" class="user-menu-overlay hidden"></div>
+  <div id="user-menu" class="user-menu hidden">
+    <div class="user-menu-header">
+        <img src="images/user-icon.png" alt="ユーザアイコン" class="user-menu-icon" />
+        <span class="user-menu-name">自分の名前</span>
+    </div>
+    <ul class="user-menu-list">
+        <li><img src="images/user.png" class="menu-icon" />自分の投稿</li>
+        <li><img src="images/friends.png" class="menu-icon" />フレンド一覧</li>
+        <li><img src="images/mail.png" class="menu-icon" />フレンド招待</li>
+        <li><img src="images/gear.png" class="menu-icon" />設定</li>
+        <li><img src="images/door.png" class="menu-icon" />ログアウト</li>
+  </ul>
+</div>
+
+    <!-- 投稿サイドフォーム用オーバーレイ -->
+    <div id="post-form-overlay" class="post-form-overlay hidden"></div>
+    <!-- 投稿サイドフォーム -->
+    <aside id="post-form-menu" class="post-form-menu hidden">
+    <div class="form-header">
+        <img class="user-icon" src="images/user.png" alt="ユーザーアイコン" />
+        <span>あなた</span>
+        <button class="form-close-btn" id="btn-close-post-form" title="閉じる">&times;</button>
+    </div>
+    <form id="post-form" class="post-form">
+        <label>
+        お店の名前
+        <input type="text" name="shop" required />
+        </label>
+        <label>
+        写真
+        <input type="file" name="photo" accept="image/*" />
+        </label>
+        <label>
+        カテゴリー
+        <input type="text" name="category" placeholder="例：カフェ" />
+        </label>
+        評価
+        <div class="star-rating">
+            <input type="radio" id="star5" name="rating" value="5"><label for="star5">★</label>
+            <input type="radio" id="star4" name="rating" value="4"><label for="star4">★</label>
+            <input type="radio" id="star3" name="rating" value="3"><label for="star3">★</label>
+            <input type="radio" id="star2" name="rating" value="2"><label for="star2">★</label>
+            <input type="radio" id="star1" name="rating" value="1"><label for="star1">★</label>
+        </div>
+        <label>
+        コメント
+        <textarea name="comment" rows="3"></textarea>
+        </label>
+        <button type="submit" class="submit-btn">投稿する</button>
+    </form>
+    </aside>
+
+<!-- スクリプト -->
+    <script src="js/map.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+  </div>
+</body>
+</html>
