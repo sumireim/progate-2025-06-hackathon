@@ -1,3 +1,4 @@
+/*
 // Google Maps APIを読み込む関数
 async function loadGoogleMapsAPI() {
     try {
@@ -214,3 +215,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         showMessage('サーバーに接続できません。後でもう一度お試しください。', 'error');
     }
 });
+*/
