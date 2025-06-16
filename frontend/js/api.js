@@ -1,3 +1,4 @@
+/*
 // Google Maps APIを読み込む関数
 async function loadGoogleMapsAPI() {
     try {
@@ -25,3 +26,4 @@ function initMap() {
 
 // APIを読み込む
 loadGoogleMapsAPI();
+*/
