@@ -1,0 +1,82 @@
+@import url('style.css');
+
+.page-container {
+  background: var(--container-bg);
+  min-height: 100vh;
+  padding: 2rem;
+  font-family: 'Noto Sans JP', sans-serif;
+  color: var(--text-color);
+}
+
+.header {
+  background: var(--header-bg);
+  padding: 1rem 2rem;
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.header nav {
+    display: flex;
+    justify-content: flex-end;
+    flex: 1;
+}
+
+.tab {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: var(--text-color);
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0.25rem;
+  font-weight: 500;
+}
+
+.main-content {
+  background: var(--sidebar-bg);
+  padding: 2rem;
+  border-radius: 0 0 16px 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.friend-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.friend-list li {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+}
+
+.friend-icon {
+  width: 40px;
+  height: 40px;
+  background: #E0C8CF;
+  border-radius: 50%;
+}
+
+.friend-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
