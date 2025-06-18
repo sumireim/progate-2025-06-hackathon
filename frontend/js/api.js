@@ -26,6 +26,8 @@ function initMap() {
 
 // APIを読み込む
 loadGoogleMapsAPI();
+*/
+
 
 
 class SpotAPI {
@@ -34,6 +36,34 @@ class SpotAPI {
         this.token = localStorage.getItem('authToken');
     }
 
+
+
+
+
+    // 認証ヘッダーの取得
+    getAuthHeaders() {
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        
+        if (this.token) {
+            headers['Authorization'] = `Bearer ${this.token}`;
+        }
+        
+        return headers;
+    }
+
+    // 🔐 トークンの保存
+    setToken(token) {
+        this.token = token;
+        localStorage.setItem('authToken', token);
+    }
+
+    // 🔐 ログアウト
+    clearToken() {
+        this.token = null;
+        localStorage.removeItem('authToken');
+    }
 
     // API接続確認
     async checkConnection() {
@@ -47,7 +77,124 @@ class SpotAPI {
             return false;
         }
     }
+    // 👤 ユーザー登録
+    async registerUser(userData) {
+        try {
+            const response = await fetch(`${this.baseURL}/users/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            });
 
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'ユーザー登録に失敗しました');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('ユーザー登録エラー:', error);
+            throw error;
+        }
+    }
+
+    // 🔑 ログイン
+    async loginUser(username, password) {
+        try {
+            const response = await fetch(`${this.baseURL}/users/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'ログインに失敗しました');
+            }
+
+            const data = await response.json();
+            this.setToken(data.access_token);
+            console.log('ログイン成功');
+            return data;
+        } catch (error) {
+            console.error('ログインエラー:', error);
+            throw error;
+        }
+    }
+
+    // 👤 現在のユーザー情報取得
+    async getCurrentUser() {
+        try {
+            const response = await fetch(`${this.baseURL}/users/me`, {
+                headers: this.getAuthHeaders()
+            });
+
+            if (!response.ok) {
+                throw new Error('ユーザー情報の取得に失敗しました');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('ユーザー情報取得エラー:', error);
+            throw error;
+        }
+    }
+
+
+
+    // 近くのスポット検索
+    async getNearbySpots(lat, lng, radius = 5, limit = 10) {
+        try {
+            const params = new URLSearchParams({
+                lat: lat.toString(),
+                lng: lng.toString(),
+                radius: radius.toString(),
+                limit: limit.toString()
+            });
+
+            const response = await fetch(`${this.baseURL}/spots/search/nearby?${params.toString()}`);
+
+            if (!response.ok) {
+                throw new Error('近くのスポット検索に失敗しました');
+            }
+
+            const data = await response.json();
+            console.log('近くのスポット取得:', data.length, '件');
+            return data;
+        } catch (error) {
+            console.error('近くのスポット検索エラー:', error);
+            throw error;
+        }
+    }
+
+
+    // おすすめスポット取得
+    async getRecommendations(userLat, userLng, limit = 5) {
+        try {
+            const params = new URLSearchParams({
+                user_lat: userLat.toString(),
+                user_lng: userLng.toString(),
+                limit: limit.toString()
+            });
+
+            const response = await fetch(`${this.baseURL}/spots/recommend/for-user?${params.toString()}`);
+
+            if (!response.ok) {
+                throw new Error('おすすめスポットの取得に失敗しました');
+            }
+
+            const data = await response.json();
+            console.log('おすすめスポット取得:', data.recommendations.length, '件');
+            return data;
+        } catch (error) {
+            console.error('おすすめスポット取得エラー:', error);
+            throw error;
+        }
+    }
     // スポット一覧取得
     async getSpots(filters = {}) {
         try {
@@ -203,6 +350,40 @@ class SpotAPI {
 // グローバルなAPIインスタンス
 const api = new SpotAPI();
 
+
+// 🔧 ユーティリティ関数
+function showMessage(message, type = 'info') {
+    // メッセージ表示用（後で実装）
+    console.log(`${type.toUpperCase()}: ${message}`);
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ja-JP', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function generateStars(rating) {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+    let stars = '';
+    
+    for (let i = 0; i < fullStars; i++) {
+        stars += '★';
+    }
+    
+    if (hasHalfStar) {
+        stars += '☆';
+    }
+    
+    return stars;
+}
+
 // 初期化時のAPI接続確認
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('アプリケーション初期化中...');
@@ -215,4 +396,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         showMessage('サーバーに接続できません。後でもう一度お試しください。', 'error');
     }
 });
-*/
+
