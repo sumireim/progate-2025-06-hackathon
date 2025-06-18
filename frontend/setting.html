@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>設定</title>
+  <link rel="stylesheet" href="css/setting.css" />
+</head>
+<body>
+  <div class="page-container">
+    <header class="header">
+      <h1>設定</h1>
+      <nav>
+        <a href="index.html" class="tab">← 戻る</a>
+      </nav>
+    </header>
+    <main class="main-content">
+      <form class="settings-form">
+        <label>
+          表示名
+          <input type="text" name="displayName" value="自分の名前" />
+        </label>
+        <label>
+          メールアドレス
+          <input type="email" name="email" value="you@example.com" />
+        </label>
+        <label>
+          通知設定
+          <select name="notifications">
+            <option>すべて受け取る</option>
+            <option>重要なもののみ</option>
+            <option>受け取らない</option>
+          </select>
+        </label>
+        <button type="submit" class="submit-btn">保存する</button>
+      </form>
+    </main>
+  </div>
+</body>
+</html>

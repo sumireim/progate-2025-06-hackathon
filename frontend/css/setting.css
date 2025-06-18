@@ -1,0 +1,70 @@
+@import url('style.css');
+
+.page-container {
+  background: var(--container-bg);
+  min-height: 100vh;
+  padding: 2rem;
+  font-family: 'Noto Sans JP', sans-serif;
+  color: var(--text-color);
+}
+
+.header {
+  background: var(--header-bg);
+  padding: 1rem 2rem;
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.header nav {
+  display: flex;
+  justify-content: flex-end;
+  flex: 1;
+}
+
+.tab {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: var(--text-color);
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0.25rem;
+  font-weight: 500;
+}
+
+.main-content {
+  background: var(--sidebar-bg);
+  padding: 2rem;
+  border-radius: 0 0 16px 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.settings-form label {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.settings-form input,
+.settings-form select {
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--input-bg);
+  font-size: 1rem;
+  color: var(--text-color);
+}
