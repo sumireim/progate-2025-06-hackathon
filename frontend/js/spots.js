@@ -84,6 +84,11 @@ class SpotShareApp {
             }
         });
 
+        //会員登録関連
+        const registerForm = document.getElementById('register-form');
+        if (registerForm) {
+            registerForm.addEventListener('submit', (e) => this.handleRegister(e));
+        }
         // ユーザーメニューオーバーレイ
         this.elements.userMenuOverlay?.addEventListener('click', () => {
             this.hideUserMenu();
@@ -195,7 +200,7 @@ class SpotShareApp {
 
         const cardsHTML = recommendations.map(spot => `
             <div class="card" data-spot-id="${spot.id}">
-                <img src="images/default-spot.jpg" alt="${spot.title}" onerror="this.src='images/default-spot.jpg'"/>
+               <img src="images/ramen_koguma.jpeg" alt="${spot.title}" onerror="this.src='images/ramen_koguma.jpeg'"/>
                 <h3>${spot.title}</h3>
                 <span class="category">${spot.category || 'その他'}</span>
                 <div class="stars">${generateStars(spot.rating)}</div>
@@ -346,6 +351,37 @@ class SpotShareApp {
         this.elements.userMenuOverlay?.classList.add('hidden');
         this.elements.userMenu?.classList.add('hidden');
     }
+    // 会員登録モーダル表示
+    showRegisterModal() {
+        const overlay = document.getElementById('register-form-overlay');
+        const modal = document.getElementById('register-form-menu');
+        
+        if (overlay && modal) {
+            overlay.classList.remove('hidden');
+            modal.classList.remove('hidden');
+        }
+    }
+
+    // 会員登録処理
+    async handleRegister(event) {
+        event.preventDefault();
+        
+        const formData = new FormData(event.target);
+        const userData = {
+            username: formData.get('username'),
+            email: formData.get('email'),
+            password: formData.get('password')
+        };
+        
+        try {
+            await api.registerUser(userData);
+            alert('会員登録が完了しました！ログインしてください。');
+            this.hideRegisterModal();
+            this.showLoginModal();
+        } catch (error) {
+            alert('会員登録に失敗しました: ' + error.message);
+        }
+    }
 
     // ログインプロンプト表示
     showLoginPrompt() {
@@ -449,5 +485,11 @@ window.refreshApp = () => {
 window.showLoginModal = () => {
     if (app) {
         app.showLoginModal();
+    }
+};
+
+window.showRegisterModal = () => {
+    if (app) {
+        app.showRegisterModal();
     }
 };
