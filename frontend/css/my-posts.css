@@ -1,0 +1,73 @@
+@import url('style.css');
+
+/* メイン全体のレイアウト調整 */
+.app-main {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background: var(--container-bg);
+  overflow-y: auto;
+  max-height: calc(100vh - 100px);
+}
+
+/* 投稿カードを縦に並べる。*/
+.posts-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 800px; 
+  gap: 1rem;
+}
+
+/* 投稿カード1つ1つ */
+.post-card {
+  width: 100%;
+  background: var(--card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  padding: 1rem;
+  box-shadow:
+    0 2px 6px rgba(0,0,0,0.03),
+    0 1.5px 4px rgba(0,0,0,0.03);
+  display: flex;
+  gap: 1rem;
+}
+
+/* 投稿画像 */
+.post-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+}
+
+/* 投稿本文エリア */
+.post-content {
+  flex: 1;
+}
+
+/* タイトル（お店名） */
+.post-content h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* コメント */
+.post-content p {
+  margin: 0.3rem 0;
+}
+
+/* 星の評価 */
+.stars {
+  color: var(--accent);
+  font-size: 0.9rem;
+}
+
+/* 時刻 */
+.time {
+  font-size: 0.75rem;
+  color: #888;
+}
