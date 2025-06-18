@@ -29,9 +29,10 @@
     <section class="map-panel">
         <div class="search-bar">
         <img src="images/search-icon.png" alt="検索アイコン" class="search-icon" />
-        <input type="text" placeholder="絞り込み検索" />
+        <input type="text" id="search-input" placeholder="絞り込み検索" />
         </div>
         <div id="map" class="map-canvas"></div>
+        <button id="get-route-button">東京駅から渋谷駅へのルートを表示</button>
     </section>
 
     <!-- 右：サイドバー -->
@@ -166,7 +167,7 @@
         プッシュする前には必ずプレースホルダー "【ここにあなたのGoogle APIキーを入力】" に戻してください。
     -->
     <script async
-        src="https://maps.googleapis.com/maps/api/js?key=【ここにあなたのGoogle APIキーを入力】&callback=initMap">
+        src="https://maps.googleapis.com/maps/api/js?key=【ここにあなたのGoogle APIキーを入力】&callback=initMap&libraries=places,routes">
     </script>
 </body>
 </html>
