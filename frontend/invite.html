@@ -2,13 +2,13 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>フレンド招待</title>
+  <title>フレンド招待・承認</title>
   <link rel="stylesheet" href="css/invite.css" />
 </head>
 <body>
   <div class="app-container">
     <header class="header">
-      <h1>フレンド招待</h1>
+      <h1>フレンド招待・承認</h1>
       <nav>
         <button type="button" id="btn-back" class="tab">← 戻る</button>
       </nav>
@@ -21,8 +21,28 @@
         </label>
         <button type="submit" class="submit-btn">招待を送る</button>
       </form>
+
+      <section class="friend-request-section">
+        <h2>届いたフレンド申請</h2>
+        <ul class="friend-request-list" id="friend-request-list">
+          <li>
+            <div class="friend-request-info">
+              <span class="friend-name">こぐま</span>
+              <span class="request-time">3時間前</span>
+            </div>
+            <button class="accept-btn" data-username="こぐま">承認</button>
+          </li>
+          <li>
+            <div class="friend-request-info">
+              <span class="friend-name">しろくま</span>
+              <span class="request-time">2日前</span>
+            </div>
+            <button class="accept-btn" data-username="しろくま">承認</button>
+          </li>
+        </ul>
+      </section>
     </main>
   </div>
-  <script src="js/spots.js"></script>
+  <script src="js/nav.js"></script>
 </body>
 </html>

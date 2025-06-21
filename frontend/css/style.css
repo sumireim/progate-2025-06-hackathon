@@ -14,7 +14,7 @@
 
 body {
   margin: 0;
-  padding: 0.5vw;
+  padding: 0;
   background: var(--outer-bg);
   font-family: 'Noto Sans JP', sans-serif;
   color: var(--text-color);
@@ -32,8 +32,8 @@ body {
 
 .app-container {
   margin: 0;
-  width: 98vw;   
-  height: 97vh;  
+  width: calc(100vw - 17px);  
+  height: calc(100vh - 17px); 
   max-width: 1500px;  
   max-height: 980px;
   display: grid;
