@@ -67,48 +67,42 @@ const googleApi = {
         this.geocoder.geocode({ address: address }, callback);
     },
 
+
     /**
-     * [Directions API] 2地点間のルートを検索し、地図上に描画します。
-     * @param {string | google.maps.LatLng | google.maps.Place} origin - 出発地
-     * @param {string | google.maps.LatLng | google.maps.Place} destination - 目的地
-     * @param {function(object, string)} callback - 結果を受け取るコールバック関数 (response, status)
+     * [Geolocation API]　ユーザーの現在地を取得します。ブラウザの機能を使いやすくラップします。
+     * @param {function(object)} onSuccess - 成功時のコールバック。引数は{lat, lng}オブジェクト。
+     * @param {function(object)} onError -失敗時のコールバック。引数はPositionError オブジェクト。
      */
-    getDirections: function(origin, destination, callback) {
-        const request = {
-            origin: origin,
-            destination: destination,
-            travelMode: google.maps.TravelMode.WALKING // 移動手段 (WALKING, DRIVING, TRANSITなど)
-        };
-        this.directionsService.route(request, (response, status) => {
-            if (status === 'OK') {
-                // 結果を地図に描画
-                this.directionsRenderer.setDirections(response);
+    getCurrentLocation: function(onSuccess, onError){
+        if(!navigator.geolocation){
+            console.error("このブラウザはGeologationをサポートしていません");
+            //サポートされていない場合のエラーオブジェクトを渡す
+            onError({code: -1, message: "Geolocation not supported." });
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const userlocation = {
+                    lat: position.coords.latitude, 
+                    lng: position.coords.longitude,
+                };
+                onSuccess(userLocation);
+            }, 
+            (error) => {
+                console.error("Geolocation error", error);
+                onError(error);
             }
-            // コールバックを呼び出し
-            if (callback && typeof callback === 'function') {
-                callback(response, status);
-            }
-        });
+        );
     }
 };
-
-
-
-
-
 // APIを読み込む
-loadGoogleMapsAPI();
+//loadGoogleMapsAPI();
 
 class SpotAPI {
     constructor() {
         this.baseURL = 'http://localhost:8000/api';
         this.token = localStorage.getItem('authToken');
     }
-
-
-
-
-
     // 認証ヘッダーの取得
     getAuthHeaders() {
         const headers = {
@@ -122,13 +116,13 @@ class SpotAPI {
         return headers;
     }
 
-    // 🔐 トークンの保存
+    // トークンの保存
     setToken(token) {
         this.token = token;
         localStorage.setItem('authToken', token);
     }
 
-    // 🔐 ログアウト
+    // ログアウト
     clearToken() {
         this.token = null;
         localStorage.removeItem('authToken');
@@ -146,38 +140,49 @@ class SpotAPI {
             return false;
         }
     }
-    // 👤 ユーザー登録
+    // ユーザー登録
     async registerUser(userData) {
         try {
             const response = await fetch(`${this.baseURL}/users/register`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(userData)
             });
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || 'ユーザー登録に失敗しました');
+                throw new Error(errorData.detail || `Registration failed: ${response.status}`);
             }
 
-            return await response.json();
+            const result = await response.json();
+            
+            // トークンを保存
+            if (result.access_token) {
+                this.setToken(result.access_token);
+                this.currentUser = result.user;
+            }
+            
+            return result;
         } catch (error) {
-            console.error('ユーザー登録エラー:', error);
+            console.error('Registration error:', error);
             throw error;
         }
     }
 
-    // 🔑 ログイン
+    // ログイン
     async loginUser(username, password) {
         try {
             const response = await fetch(`${this.baseURL}/users/login`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
             });
 
             if (!response.ok) {
@@ -185,17 +190,22 @@ class SpotAPI {
                 throw new Error(errorData.detail || 'ログインに失敗しました');
             }
 
-            const data = await response.json();
-            this.setToken(data.access_token);
-            console.log('ログイン成功');
-            return data;
+            const result = await response.json();
+            
+            // トークンを保存
+            if (result.access_token) {
+                this.setToken(result.access_token);
+                this.currentUser = result.user;
+            }
+            
+            return result;
         } catch (error) {
-            console.error('ログインエラー:', error);
+            console.error('Login error:', error);
             throw error;
         }
     }
 
-    // 👤 現在のユーザー情報取得
+    // 現在のユーザー情報取得
     async getCurrentUser() {
         try {
             const response = await fetch(`${this.baseURL}/users/me`, {

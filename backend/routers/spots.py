@@ -19,7 +19,7 @@ class SpotCreate(BaseModel):
     longitude: float
     rating: Optional[float] = 0
     address: Optional[str] = None
-    is_public: Optional[bool] = True
+    visibility: Optional[str] = "friends_only" # 友達だけ
 
 class SpotUpdate(BaseModel):
     title: Optional[str] = None
@@ -27,7 +27,7 @@ class SpotUpdate(BaseModel):
     category: Optional[str] = None
     rating: Optional[float] = None
     address: Optional[str] = None
-    is_public: Optional[bool] = None
+    # is_public: Optional[bool] = None
 
 class SpotResponse(BaseModel):
     id: int
@@ -38,8 +38,9 @@ class SpotResponse(BaseModel):
     longitude: float
     rating: float
     address: Optional[str]
-    is_public: bool
+    # is_public: bool
     owner_id: int
+    owner_name: str
     created_at: datetime
     
     class Config:
@@ -82,7 +83,8 @@ async def get_spots(
     """スポット一覧取得（検索・絞り込み対応）"""
     
     # 基本クエリ
-    query = db.query(Spot).filter(Spot.is_public == True)
+    # query = db.query(Spot).filter(Spot.is_public == True)
+    query = db.query(Spot)
     
     # カテゴリ絞り込み
     if category:
@@ -153,7 +155,7 @@ async def create_spot(spot: SpotCreate, db: Session = Depends(get_db)):
         longitude=spot.longitude,
         rating=spot.rating,
         address=spot.address,
-        is_public=spot.is_public,
+        # is_public=spot.is_public,
         owner_id=owner_id
     )
     
@@ -214,7 +216,8 @@ async def get_nearby_spots(
     """近くのスポット検索"""
     
     # 全ての公開スポットを取得
-    spots = db.query(Spot).filter(Spot.is_public == True).all()
+    # spots = db.query(Spot).filter(Spot.is_public == True).all()
+    spots = db.query(Spot).all()
     
     # 距離計算してソート
     spots_with_distance = []
@@ -276,7 +279,7 @@ async def get_categories(db: Session = Depends(get_db)):
     # 現在登録されているカテゴリを取得
     categories = db.query(Spot.category).distinct().filter(
         Spot.category.isnot(None),
-        Spot.is_public == True
+        # Spot.is_public == True
     ).all()
     
     category_list = [cat[0] for cat in categories if cat[0]]
