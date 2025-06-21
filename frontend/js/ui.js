@@ -41,24 +41,121 @@ class UIManager {
     showMessage(message, type = 'info', duration = 5000) {
         const messageElement = document.createElement('div');
         messageElement.className = `message ${type}`;
+        
+        messageElement.style.cssText = `
+            padding: 12px 16px;
+            margin: 8px 0;
+            border-radius: 6px;
+            color: white;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            font-family: Arial, sans-serif;
+            `;
+
+        const colors = {
+            success: '#28a745',
+            error: '#dc3545',
+            warning: '#ffc107',
+            info: '#17a2b8'
+        };
+
+        messageElement.style.backgroundColor = colors[type] || colors.info;
         messageElement.textContent = message;
-        // (スタイル設定は省略。元のコードをコピーしてください)
+
         this.messageContainer.appendChild(messageElement);
-        // (アニメーションや削除のロジックも元のコードをコピーしてください)
+        // アニメーション表示
+
+        setTimeout(() => {
+            messageElement.style.opacity = '1';
+            messageElement.style.transform = 'translateX(0)';
+        }, 100);
+
+        // 自動削除
+        setTimeout(() => {
+            messageElement.style.opacity = '0';
+            messageElement.style.transform = 'translateX(100%)';
+            setTimeout(() => messageElement.remove(), 300);
+        }, duration);
     }
 
     displayRecommendations(recommendations) {
         if (!this.elements.recommendList) return;
-        // (おすすめスポットを描画するHTML生成ロジックは元のコードをコピーしてください)
+        if (recommendations.length === 0) {
+            this.elements.recommendList.innerHTML = `
+            <div class="no-data">
+            <p>おすすめスポットがありません</p>
+            <p>スポットを投稿してみませんか？</p>
+            </div>
+            `;
+            return;
+        }
+        
+        const cardsHTML = recommendations.map(spot => `
+            <div class="card" data-spot-id="${spot.id}">
+                <img src="images/ramen_koguma.jpeg" alt="${spot.title}" onerror="this.src='images/ramen_koguma.jpeg'"/>
+                <h3>${spot.title}</h3>
+                <span class="category">${spot.category || 'その他'}</span>
+                <div class="stars">${generateStars(spot.rating)}</div>
+                <div class="spot-info">
+                    <p class="spot-description">${spot.description || ''}</p>
+                    <p class="spot-owner">投稿者: ${spot.owner_username || '匿名'}</p>
+                </div>
+            </div>
+        `).join('');
+
+        this.elements.recommendList.innerHTML = cardsHTML;
+
+        // カードクリックイベント
+        this.elements.recommendList.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                const spotId = card.dataset.spotId;
+                this.showSpotDetails(spotId);
+            });
+        });
     }
 
     displayRecentPosts(spots) {
         if (!this.elements.postList) return;
-        // (最新投稿を描画するHTML生成ロジックは元のコードをコピーしてください)
+        if (spots.length === 0) {
+            this.elements.postList.innerHTML = `
+                <li class="no-data">
+                <p>まだ投稿がありません</p>
+                </li>
+            `;
+            return;
+        }
+
+        const postsHTML = spots.slice(0, 5).map(spot => `
+            <li>
+                <div class="user-icon">
+                    ${spot.owner_username ? spot.owner_username.charAt(0).toUpperCase() : '?'}
+                </div>
+                <div class="post-content">
+                    p><strong>${spot.title}</strong> - ${spot.description || ''}</p>
+                    <div class="post-time">${this.getRelativeTime(spot.created_at)}</div>
+                </div>
+            </li>
+        `).join('');
+        this.elements.postList.innerHTML = postsHTML;
     }
     
     getRelativeTime(dateString) {
-        // (相対時間を計算するロジックは元のコードをコピーしてください)
+        const now = new Date();
+        const postDate = new Date(dateString);
+        const diffMs = now - postDate;
+        const diffMins = Math.floor(diffMs / (1000 * 60));
+        const diffHours = Math.floor(diffMins / 60);
+        const diffDays = Math.floor(diffHours / 24);
+
+        if (diffMins < 1) return 'たった今';
+        if (diffMins < 60) return `${diffMins}分前`;
+        if (diffHours < 24) return `${diffHours}時間前`;
+        if (diffDays < 7) return `${diffDays}日前`;
+
+        return postDate.toLocaleDateString('ja-JP');
+
     }
 
     showPostForm() {
