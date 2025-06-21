@@ -31,29 +31,11 @@ class SpotShareApp {
             searchBtn: document.getElementById('btn-search'),
 
             // メッセージコンテナ
-            messageContainer: this.createMessageContainer()
+            // messageContainer: this.createMessageContainer()
         };
         
         this.waitForAPI(); //APIが利用可能になったら初期化
     }
-
-    /*async init() {
-        console.log('SpotShareApp 初期化中...');
-        
-        // イベントリスナーの設定
-        this.setupEventListeners();
-        
-        // ユーザー位置情報取得
-        await this.getUserLocation();
-        
-        // 認証状態チェック
-        await this.checkAuthStatus();
-        
-        // 初期データ読み込み
-        await this.loadInitialData();
-        
-        console.log('SpotShareApp 初期化完了');
-    }*/
     // APIが利用可能になるまで待機
     // APIの初期化を待つ
     async waitForAPI() {
@@ -201,6 +183,7 @@ class SpotShareApp {
             return false;
         }
     }
+
     // ウェルカムモーダル表示（登録/ログイン選択）
     async showWelcomeModal() {
         return new Promise((resolve) => {
@@ -598,24 +581,6 @@ class SpotShareApp {
         document.body.style.overflow = '';
     }
 
-    // メッセージコンテナを作成
-    createMessageContainer() {
-        let container = document.getElementById('message-container');
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'message-container';
-            container.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                z-index: 10001;
-                max-width: 400px;
-            `;
-            document.body.appendChild(container);
-        }
-        return container;
-    }
-
     setupEventListeners() {
         // 投稿ボタン
         this.elements.postBtn?.addEventListener('click', () => {
@@ -690,27 +655,6 @@ class SpotShareApp {
             console.warn('位置情報取得エラー:', error);
             // デフォルト位置（東京駅）
             this.userLocation = { lat: 35.6762, lng: 139.6503 };
-        }
-    }
-
-    // 認証状態確認
-    async checkAuthStatus() {
-        try {
-            if (api.token) {
-                this.currentUser = await api.getCurrentUser();
-                this.isAuthenticated = true;
-                this.updateUIForAuthenticatedUser();
-                console.log('認証済みユーザー:', this.currentUser.username);
-            } else {
-                this.isAuthenticated = false;
-                this.updateUIForGuestUser();
-                console.log('ゲストユーザー');
-            }
-        } catch (error) {
-            console.warn('認証状態確認エラー:', error);
-            this.isAuthenticated = false;
-            api.clearToken();
-            this.updateUIForGuestUser();
         }
     }
 
@@ -931,24 +875,6 @@ class SpotShareApp {
 
         this.handleLogin(username, password);
     }
-
-/*    // ログイン処理
-    async handleLogin(username, password) {
-        console.log('ログイン試行:', username);
-        try {
-            await api.loginUser(username, password);
-            await this.checkAuthStatus();
-            alert('ログインしました！');
-            
-            // データ再読み込み
-            await this.loadInitialData();
-            
-        } catch (error) {
-            console.error('ログインエラー:', error);
-            alert(`ログインに失敗しました: ${error.message}`);
-        }
-    }*/
-
     // 認証済みユーザー用UI更新
     updateUIForAuthenticatedUser() {
         // ユーザーメニューの名前更新
@@ -1034,6 +960,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+    const backBtn = document.getElementById('btn-back');
+    if (backBtn) {
+        backBtn.addEventListener('click', () => {
+        window.location.href = "index.html";
+        });
+    }
+
+    const cancelBtn = document.getElementById('btn-cancel');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.location.href = "index.html";
+        });
+    }
 });
 
 // グローバル関数（デバッグ用）
@@ -1048,20 +988,3 @@ window.showLoginModal = () => {
         app.showLoginModal();
     }
 };
-
-document.addEventListener('DOMContentLoaded', () => {
-  const backBtn = document.getElementById('btn-back');
-  if (backBtn) {
-    backBtn.addEventListener('click', () => {
-      window.location.href = "index.html";
-    });
-  }
-
-  const cancelBtn = document.getElementById('btn-cancel');
-  if (cancelBtn) {
-    cancelBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      window.location.href = "index.html";
-    });
-  }
-});
