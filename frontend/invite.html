@@ -13,16 +13,313 @@
         <button type="button" id="btn-back" class="tab">← 戻る</button>
       </nav>
     </header>
+    
     <main class="main-content">
-      <form class="invite-form">
-        <label>
-          相手のユーザー名
-          <input type="text" name="username" required />
-        </label>
-        <button type="submit" class="submit-btn">招待を送る</button>
-      </form>
+      <!-- 既存のフォーム部分を検索機能に変更 -->
+      <section class="search-section">
+        <h2>ユーザー検索</h2>
+        <form class="invite-form" id="search-form">
+          <label>
+            相手のユーザー名
+            <input type="text" name="username" id="search-input" placeholder="ユーザー名で検索..." required />
+          </label>
+          <button type="submit" class="submit-btn">検索</button>
+        </form>
+        
+        <!-- 検索結果表示エリア -->
+        <div id="search-results" class="search-results" style="display: none;">
+          <h3>検索結果</h3>
+          <div id="results-list"></div>
+        </div>
+      </section>
+
+      <!-- 受信したフレンド申請セクション -->
+      <section class="requests-section">
+        <h2>受信したフレンド申請 <span id="request-count" class="badge">0</span></h2>
+        <div id="received-requests" class="request-list">
+          <p class="loading">読み込み中...</p>
+        </div>
+      </section>
+
+      <!-- 送信したフレンド申請セクション -->
+      <section class="sent-requests-section">
+        <h2>送信済み申請</h2>
+        <div id="sent-requests" class="request-list">
+          <p class="loading">読み込み中...</p>
+        </div>
+      </section>
     </main>
   </div>
-  <script src="js/spots.js"></script>
+
+  <!-- メッセージ表示用（成功・エラー） -->
+  <div id="message-overlay" class="message-overlay" style="display: none;">
+    <div class="message-content">
+      <p id="message-text"></p>
+      <button id="message-close" class="message-close">OK</button>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    // invite.html 専用のJavaScript
+    class InvitePageManager {
+      constructor() {
+        this.init();
+      }
+
+      async init() {
+        this.setupEventListeners();
+        await this.loadReceivedRequests();
+        await this.loadSentRequests();
+      }
+
+      setupEventListeners() {
+        // 戻るボタン
+        document.getElementById('btn-back').addEventListener('click', () => {
+          window.location.href = 'index.html';
+        });
+
+        // 検索フォーム
+        document.getElementById('search-form').addEventListener('submit', (e) => {
+          e.preventDefault();
+          this.searchUsers();
+        });
+
+        // メッセージクローズ
+        document.getElementById('message-close').addEventListener('click', () => {
+          document.getElementById('message-overlay').style.display = 'none';
+        });
+      }
+
+      async searchUsers() {
+        const searchInput = document.getElementById('search-input');
+        const query = searchInput.value.trim();
+        
+        if (query.length < 2) {
+          this.showMessage('検索キーワードは2文字以上で入力してください', 'error');
+          return;
+        }
+
+        try {
+          this.showLoading('検索中...');
+          const result = await api.searchUsers(query);
+          this.displaySearchResults(result.users);
+          this.hideLoading();
+        } catch (error) {
+          console.error('検索エラー:', error);
+          this.showMessage(`検索に失敗しました: ${error.message}`, 'error');
+          this.hideLoading();
+        }
+      }
+
+      displaySearchResults(users) {
+        const resultsContainer = document.getElementById('search-results');
+        const resultsList = document.getElementById('results-list');
+        
+        if (users.length === 0) {
+          resultsList.innerHTML = '<p class="no-results">該当するユーザーが見つかりません</p>';
+          resultsContainer.style.display = 'block';
+          return;
+        }
+
+        const html = users.map(user => {
+          let actionButton = '';
+          
+          if (user.is_friend) {
+            actionButton = '<span class="status friend">フレンド</span>';
+          } else if (user.request_status === 'sent') {
+            actionButton = '<span class="status pending">申請送信済み</span>';
+          } else if (user.request_status === 'received') {
+            actionButton = '<span class="status received">申請受信中</span>';
+          } else {
+            actionButton = `<button class="invite-btn" onclick="inviteManager.sendRequest('${user.username}')">招待</button>`;
+          }
+
+          return `
+            <div class="user-item">
+              <div class="user-info">
+                <div class="user-avatar">${user.display_name.charAt(0).toUpperCase()}</div>
+                <div class="user-details">
+                  <h4>${user.display_name}</h4>
+                  <p>@${user.username}</p>
+                </div>
+              </div>
+              <div class="user-action">
+                ${actionButton}
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        resultsList.innerHTML = html;
+        resultsContainer.style.display = 'block';
+      }
+
+      async sendRequest(username) {
+        try {
+          this.showLoading('招待送信中...');
+          const result = await api.sendFriendRequest(username);
+          this.showMessage(result.message, 'success');
+          
+          // 検索結果と送信済み申請を更新
+          await this.searchUsers();
+          await this.loadSentRequests();
+          this.hideLoading();
+        } catch (error) {
+          console.error('フレンド申請エラー:', error);
+          this.showMessage(`招待送信に失敗しました: ${error.message}`, 'error');
+          this.hideLoading();
+        }
+      }
+
+      async loadReceivedRequests() {
+        try {
+          const result = await api.getReceivedRequests();
+          this.displayReceivedRequests(result.requests);
+          
+          // バッジ更新
+          document.getElementById('request-count').textContent = result.requests.length;
+        } catch (error) {
+          console.error('受信申請取得エラー:', error);
+          document.getElementById('received-requests').innerHTML = 
+            '<p class="error">受信申請の取得に失敗しました</p>';
+        }
+      }
+
+      displayReceivedRequests(requests) {
+        const container = document.getElementById('received-requests');
+        
+        if (requests.length === 0) {
+          container.innerHTML = '<p class="no-requests">新しいフレンド申請はありません</p>';
+          return;
+        }
+
+        const html = requests.map(request => `
+          <div class="request-item">
+            <div class="request-info">
+              <div class="user-avatar">${request.requester_name.charAt(0).toUpperCase()}</div>
+              <div class="request-details">
+                <h4>${request.requester_name}</h4>
+                <p class="request-time">${this.formatDate(request.created_at)}</p>
+              </div>
+            </div>
+            <div class="request-actions">
+              <button class="accept-btn" onclick="inviteManager.acceptRequest(${request.id})">承認</button>
+              <button class="reject-btn" onclick="inviteManager.rejectRequest(${request.id})">拒否</button>
+            </div>
+          </div>
+        `).join('');
+
+        container.innerHTML = html;
+      }
+
+      async loadSentRequests() {
+        try {
+          const result = await api.getSentRequests();
+          this.displaySentRequests(result.requests);
+        } catch (error) {
+          console.error('送信申請取得エラー:', error);
+          document.getElementById('sent-requests').innerHTML = 
+            '<p class="error">送信申請の取得に失敗しました</p>';
+        }
+      }
+
+      displaySentRequests(requests) {
+        const container = document.getElementById('sent-requests');
+        
+        if (requests.length === 0) {
+          container.innerHTML = '<p class="no-requests">送信済みの申請はありません</p>';
+          return;
+        }
+
+        const html = requests.map(request => `
+          <div class="request-item">
+            <div class="request-info">
+              <div class="user-avatar">${request.requested_name.charAt(0).toUpperCase()}</div>
+              <div class="request-details">
+                <h4>${request.requested_name}</h4>
+                <p class="request-time">${this.formatDate(request.created_at)}</p>
+              </div>
+            </div>
+            <div class="request-actions">
+              <span class="status pending">承認待ち</span>
+            </div>
+          </div>
+        `).join('');
+
+        container.innerHTML = html;
+      }
+
+      async acceptRequest(requestId) {
+        try {
+          this.showLoading('承認中...');
+          const result = await api.acceptFriendRequest(requestId);
+          this.showMessage(result.message, 'success');
+          
+          // データ再読み込み
+          await this.loadReceivedRequests();
+          this.hideLoading();
+        } catch (error) {
+          console.error('申請承認エラー:', error);
+          this.showMessage(`承認に失敗しました: ${error.message}`, 'error');
+          this.hideLoading();
+        }
+      }
+
+      async rejectRequest(requestId) {
+        if (!confirm('この申請を拒否しますか？')) {
+          return;
+        }
+
+        try {
+          this.showLoading('拒否中...');
+          const result = await api.rejectFriendRequest(requestId);
+          this.showMessage(result.message, 'success');
+          
+          // データ再読み込み
+          await this.loadReceivedRequests();
+          this.hideLoading();
+        } catch (error) {
+          console.error('申請拒否エラー:', error);
+          this.showMessage(`拒否に失敗しました: ${error.message}`, 'error');
+          this.hideLoading();
+        }
+      }
+
+      formatDate(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffHours = Math.floor((now - date) / (1000 * 60 * 60));
+        
+        if (diffHours < 1) return 'たった今';
+        if (diffHours < 24) return `${diffHours}時間前`;
+        
+        return date.toLocaleDateString('ja-JP');
+      }
+
+      showMessage(message, type = 'info') {
+        const messageText = document.getElementById('message-text');
+        const messageOverlay = document.getElementById('message-overlay');
+        
+        messageText.textContent = message;
+        messageOverlay.className = `message-overlay ${type}`;
+        messageOverlay.style.display = 'flex';
+      }
+
+      showLoading(message) {
+        this.showMessage(message, 'loading');
+      }
+
+      hideLoading() {
+        document.getElementById('message-overlay').style.display = 'none';
+      }
+    }
+
+    // ページ読み込み時に初期化
+    let inviteManager;
+    document.addEventListener('DOMContentLoaded', () => {
+      inviteManager = new InvitePageManager();
+    });
+  </script>
 </body>
 </html>

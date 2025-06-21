@@ -8,8 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 
 # ルーターのインポート
-from routers import spots
-from routers import users
+from routers import spots, users , friends
 
 app = FastAPI(title="Spot Share API", version="1.0.0")
 
@@ -27,6 +26,7 @@ app.add_middleware(
 # ルーター登録
 app.include_router(spots.router)
 app.include_router(users.router)
+app.include_router(friends.router)
 
 @app.on_event("startup")
 async def startup_event():
