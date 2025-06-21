@@ -59,19 +59,38 @@ class SpotShareApp {
             this.isAuthenticated ? this.ui.showPostForm() : this.auth.showLoginPrompt();
         });
 
-        // ユーザーメニュー
-        this.ui.elements.menuBtn?.addEventListener('click', () => {
-            this.isAuthenticated ? this.ui.toggleUserMenu() : this.auth.showLoginPrompt();
+        // 投稿フォーム閉じる
+        this.elements.closePostFormBtn?.addEventListener('click', () => {
+            this.hidePostForm();
         });
-        
+
+        // オーバーレイクリックで閉じる
+        this.elements.postFormOverlay?.addEventListener('click', () => {
+            this.hidePostForm();
+        });
+
         // 投稿フォーム送信
-        this.ui.elements.postForm?.addEventListener('submit', (e) => {
+        this.elements.postForm?.addEventListener('submit', (e) => {
             e.preventDefault();
             this.handlePostSubmit(e);
         });
 
-        // (他のナビゲーションなどのイベントリスナーもここに追加)
+        // ユーザーメニュー
+        this.ui.elements.menuBtn?.addEventListener('click', () => {
+            this.isAuthenticated ? this.ui.toggleUserMenu() : this.auth.showLoginPrompt();
+        });
+
+        // ユーザーメニューオーバーレイ
+        this.elements.userMenuOverlay?.addEventListener('click', () => {
+            this.hideUserMenu();
+        });
+
+        // 検索ボタン
+        this.elements.searchBtn?.addEventListener('click', () => {
+            this.showSearchView();
+        });
     }
+
 
     /**
      * 初期データをまとめて読み込む
