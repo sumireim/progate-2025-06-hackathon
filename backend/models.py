@@ -80,20 +80,6 @@ class Friendship(Base):
     requested = relationship("User", foreign_keys=[requested_id], back_populates="received_requests")
 
 
-class RealtimePost(Base):
-    """リアルタイム情報投稿テーブル"""
-    __tablename__ = "realtime_posts"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    spot_id = Column(Integer, ForeignKey("spots.id"), nullable=True)  # 既存スポットに関連する場合
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    title = Column(String(100), nullable=False)
-    content = Column(Text, nullable=False)  # 「今混雑してます」「タイムセール中」など
-    expires_at = Column(DateTime)  # リアルタイム情報の有効期限
-    is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-
-
 # 以下これから実装
 class SpotLike(Base):
     """スポットいいねテーブル"""

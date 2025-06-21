@@ -97,18 +97,13 @@ const googleApi = {
 
 
 // APIを読み込む
-loadGoogleMapsAPI();
+//loadGoogleMapsAPI();
 
 class SpotAPI {
     constructor() {
         this.baseURL = 'http://localhost:8000/api';
         this.token = localStorage.getItem('authToken');
     }
-
-
-
-
-
     // 認証ヘッダーの取得
     getAuthHeaders() {
         const headers = {
@@ -122,13 +117,13 @@ class SpotAPI {
         return headers;
     }
 
-    // 🔐 トークンの保存
+    // トークンの保存
     setToken(token) {
         this.token = token;
         localStorage.setItem('authToken', token);
     }
 
-    // 🔐 ログアウト
+    // ログアウト
     clearToken() {
         this.token = null;
         localStorage.removeItem('authToken');
@@ -146,38 +141,49 @@ class SpotAPI {
             return false;
         }
     }
-    // 👤 ユーザー登録
+    // ユーザー登録
     async registerUser(userData) {
         try {
             const response = await fetch(`${this.baseURL}/users/register`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(userData)
             });
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || 'ユーザー登録に失敗しました');
+                throw new Error(errorData.detail || `Registration failed: ${response.status}`);
             }
 
-            return await response.json();
+            const result = await response.json();
+            
+            // トークンを保存
+            if (result.access_token) {
+                this.setToken(result.access_token);
+                this.currentUser = result.user;
+            }
+            
+            return result;
         } catch (error) {
-            console.error('ユーザー登録エラー:', error);
+            console.error('Registration error:', error);
             throw error;
         }
     }
 
-    // 🔑 ログイン
+    // ログイン
     async loginUser(username, password) {
         try {
             const response = await fetch(`${this.baseURL}/users/login`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: JSON.stringify({ username, password })
+                body: new URLSearchParams({
+                    username: username,
+                    password: password
+                })
             });
 
             if (!response.ok) {
@@ -185,17 +191,22 @@ class SpotAPI {
                 throw new Error(errorData.detail || 'ログインに失敗しました');
             }
 
-            const data = await response.json();
-            this.setToken(data.access_token);
-            console.log('ログイン成功');
-            return data;
+            const result = await response.json();
+            
+            // トークンを保存
+            if (result.access_token) {
+                this.setToken(result.access_token);
+                this.currentUser = result.user;
+            }
+            
+            return result;
         } catch (error) {
-            console.error('ログインエラー:', error);
+            console.error('Login error:', error);
             throw error;
         }
     }
 
-    // 👤 現在のユーザー情報取得
+    // 現在のユーザー情報取得
     async getCurrentUser() {
         try {
             const response = await fetch(`${this.baseURL}/users/me`, {
