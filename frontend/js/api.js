@@ -424,6 +424,162 @@ class SpotAPI {
             throw error;
         }
     }
+/*-----------フレンド関連-----------*/ 
+    // フレンド検索
+    async searchUsers(query) {
+        try {
+            const params = new URLSearchParams({ query });
+            const response = await fetch(`${this.baseURL}/friends/search?${params}`, {
+                headers: this.getAuthHeaders()
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'ユーザー検索に失敗しました');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('ユーザー検索エラー:', error);
+            throw error;
+        }
+    }
+
+    // フレンド申請送信
+    async sendFriendRequest(username) {
+        try {
+            const response = await fetch(`${this.baseURL}/friends/request`, {
+                method: 'POST',
+                headers: this.getAuthHeaders(),
+                body: JSON.stringify({ username })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'フレンド申請に失敗しました');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('フレンド申請エラー:', error);
+            throw error;
+        }
+    }
+
+    // 受信したフレンド申請一覧
+    async getReceivedRequests() {
+        try {
+            const response = await fetch(`${this.baseURL}/friends/requests/received`, {
+                headers: this.getAuthHeaders()
+            });
+
+            if (!response.ok) {
+                throw new Error('受信申請一覧の取得に失敗しました');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('受信申請一覧取得エラー:', error);
+            throw error;
+        }
+    }
+
+    // 送信したフレンド申請一覧
+    async getSentRequests() {
+        try {
+            const response = await fetch(`${this.baseURL}/friends/requests/sent`, {
+                headers: this.getAuthHeaders()
+            });
+
+            if (!response.ok) {
+                throw new Error('送信申請一覧の取得に失敗しました');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('送信申請一覧取得エラー:', error);
+            throw error;
+        }
+    }
+
+    // フレンド申請承認
+    async acceptFriendRequest(requestId) {
+        try {
+            const response = await fetch(`${this.baseURL}/friends/requests/${requestId}/accept`, {
+                method: 'POST',
+                headers: this.getAuthHeaders()
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'フレンド申請承認に失敗しました');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('フレンド申請承認エラー:', error);
+            throw error;
+        }
+    }
+
+    // フレンド申請拒否
+    async rejectFriendRequest(requestId) {
+        try {
+            const response = await fetch(`${this.baseURL}/friends/requests/${requestId}/reject`, {
+                method: 'POST',
+                headers: this.getAuthHeaders()
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'フレンド申請拒否に失敗しました');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('フレンド申請拒否エラー:', error);
+            throw error;
+        }
+    }
+
+    // フレンド一覧取得
+    async getFriends() {
+        try {
+            const response = await fetch(`${this.baseURL}/friends/`, {
+                headers: this.getAuthHeaders()
+            });
+
+            if (!response.ok) {
+                throw new Error('フレンド一覧の取得に失敗しました');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('フレンド一覧取得エラー:', error);
+            throw error;
+        }
+    }
+
+    // フレンド削除
+    async removeFriend(friendId) {
+        try {
+            const response = await fetch(`${this.baseURL}/friends/${friendId}`, {
+                method: 'DELETE',
+                headers: this.getAuthHeaders()
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'フレンド削除に失敗しました');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('フレンド削除エラー:', error);
+            throw error;
+        }
+    }
+    
 }
 
 // グローバルなAPIインスタンス

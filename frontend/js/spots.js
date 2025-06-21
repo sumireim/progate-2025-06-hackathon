@@ -33,42 +33,9 @@ class SpotShareApp {
 
             searchInput: document.getElementById('search-input')
         };
-    }
-
-    /**
-     * map.jsから呼び出される、アプリのメイン処理開始メソッド
-     * @param {*} mapObject - map.jsで作成された地図オブジェクト
-     * @param {*} userLocation - map.jsで取得されたユーザーの位置情報
-     */
-    start(mapObject, userLocation){
-        console.log('SpotShareApp : start() - 地図の準備が完了、アプリを起動します。');
-
-
-            // メッセージコンテナ
-            messageContainer: this.createMessageContainer()
-        };
-        
+    
         this.waitForAPI(); //APIが利用可能になったら初期化
     }
-
-    /*async init() {
-        console.log('SpotShareApp 初期化中...');
-
-        
-        this.map = mapObject;
-        this.userLocation = userLocation;
-
-        // イベントリスナーの設定
-        this.setupEventListeners();
-        
-        // 認証状態チェック
-        this.checkAuthStatus();
-        
-        // 初期データ読み込み
-        this.loadInitialData();
-        
-        console.log('SpotShareApp 初期化完了');
-    }*/
     // APIが利用可能になるまで待機
     // APIの初期化を待つ
     async waitForAPI() {
@@ -216,6 +183,7 @@ class SpotShareApp {
             return false;
         }
     }
+
     // ウェルカムモーダル表示（登録/ログイン選択）
     async showWelcomeModal() {
         return new Promise((resolve) => {
@@ -613,45 +581,6 @@ class SpotShareApp {
         document.body.style.overflow = '';
     }
 
-    // メッセージコンテナを作成
-    createMessageContainer() {
-        let container = document.getElementById('message-container');
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'message-container';
-            container.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                z-index: 10001;
-                max-width: 400px;
-            `;
-            document.body.appendChild(container);
-        }
-        return container;
-    }
-
-    // 認証状態確認
-    async checkAuthStatus() {
-        try {
-            if (api.token) {
-                this.currentUser = await api.getCurrentUser();
-                this.isAuthenticated = true;
-                this.updateUIForAuthenticatedUser();
-                console.log('認証済みユーザー:', this.currentUser.username);
-            } else {
-                this.isAuthenticated = false;
-                this.updateUIForGuestUser();
-                console.log('ゲストユーザー');
-            }
-        } catch (error) {
-            console.warn('認証状態確認エラー:', error);
-            this.isAuthenticated = false;
-            api.clearToken();
-            this.updateUIForGuestUser();
-        }
-    }
-
     setupEventListeners() {
         // 投稿ボタン
         this.elements.postBtn?.addEventListener('click', () => {
@@ -947,24 +876,6 @@ class SpotShareApp {
 
         this.handleLogin(username, password);
     }
-
-/*    // ログイン処理
-    async handleLogin(username, password) {
-        console.log('ログイン試行:', username);
-        try {
-            await api.loginUser(username, password);
-            await this.checkAuthStatus();
-            alert('ログインしました！');
-            
-            // データ再読み込み
-            await this.loadInitialData();
-            
-        } catch (error) {
-            console.error('ログインエラー:', error);
-            alert(`ログインに失敗しました: ${error.message}`);
-        }
-    }*/
-
     // 認証済みユーザー用UI更新
     updateUIForAuthenticatedUser() {
         // ユーザーメニューの名前更新
@@ -1048,6 +959,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+    const backBtn = document.getElementById('btn-back');
+    if (backBtn) {
+        backBtn.addEventListener('click', () => {
+        window.location.href = "index.html";
+        });
+    }
+
+    const cancelBtn = document.getElementById('btn-cancel');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.location.href = "index.html";
+        });
+    }
 });
 
 // グローバル関数（デバッグ用）
@@ -1062,42 +987,3 @@ window.showLoginModal = () => {
         app.showLoginModal();
     }
 };
-
-
-
-const app = new SpotShareApp();
-
-document.addEventListener('DOMContentLoaded', () => {
-  const backBtn = document.getElementById('btn-back');
-  if (backBtn) {
-    backBtn.addEventListener('click', () => {
-      window.location.href = "index.html";
-    });
-  }
-
-  const cancelBtn = document.getElementById('btn-cancel');
-  if (cancelBtn) {
-    cancelBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      window.location.href = "index.html";
-    });
-  }
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-  const requestList = document.getElementById('friend-request-list');
-  if (requestList) {
-    requestList.addEventListener('click', (e) => {
-      if (e.target.classList.contains('accept-btn')) {
-        const li = e.target.closest('li');
-        if (li) {
-          li.style.opacity = 0.5;
-          e.target.textContent = '承認済み';
-          e.target.disabled = true;
-          // API連携するときは↓のように
-          // api.acceptFriendRequest(li.dataset.username);
-        }
-      }
-    });
-  }
-});
