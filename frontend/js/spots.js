@@ -496,3 +496,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+  const requestList = document.getElementById('friend-request-list');
+  if (requestList) {
+    requestList.addEventListener('click', (e) => {
+      if (e.target.classList.contains('accept-btn')) {
+        const li = e.target.closest('li');
+        if (li) {
+          li.style.opacity = 0.5;
+          e.target.textContent = '承認済み';
+          e.target.disabled = true;
+          // API連携するときは↓のように
+          // api.acceptFriendRequest(li.dataset.username);
+        }
+      }
+    });
+  }
+});
