@@ -67,28 +67,32 @@ const googleApi = {
         this.geocoder.geocode({ address: address }, callback);
     },
 
+
     /**
-     * [Directions API] 2地点間のルートを検索し、地図上に描画します。
-     * @param {string | google.maps.LatLng | google.maps.Place} origin - 出発地
-     * @param {string | google.maps.LatLng | google.maps.Place} destination - 目的地
-     * @param {function(object, string)} callback - 結果を受け取るコールバック関数 (response, status)
+     * [Geolocation API]　ユーザーの現在地を取得します。ブラウザの機能を使いやすくラップします。
+     * @param {function(object)} onSuccess - 成功時のコールバック。引数は{lat, lng}オブジェクト。
+     * @param {function(object)} onError -失敗時のコールバック。引数はPositionError オブジェクト。
      */
-    getDirections: function(origin, destination, callback) {
-        const request = {
-            origin: origin,
-            destination: destination,
-            travelMode: google.maps.TravelMode.WALKING // 移動手段 (WALKING, DRIVING, TRANSITなど)
-        };
-        this.directionsService.route(request, (response, status) => {
-            if (status === 'OK') {
-                // 結果を地図に描画
-                this.directionsRenderer.setDirections(response);
+    getCurrentLocation: function(onSuccess, onError){
+        if(!navigator.geolocation){
+            console.error("このブラウザはGeologationをサポートしていません");
+            //サポートされていない場合のエラーオブジェクトを渡す
+            onError({code: -1, message: "Geolocation not supported." });
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const userlocation = {
+                    lat: position.coords.latitude, 
+                    lng: position.coords.longitude,
+                };
+                onSuccess(userLocation);
+            }, 
+            (error) => {
+                console.error("Geolocation error", error);
+                onError(error);
             }
-            // コールバックを呼び出し
-            if (callback && typeof callback === 'function') {
-                callback(response, status);
-            }
-        });
+        );
     }
 };
 // APIを読み込む
