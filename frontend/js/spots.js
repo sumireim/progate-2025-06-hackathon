@@ -2,6 +2,7 @@ class SpotShareApp {
     constructor() {
         this.currentUser = null;
         this.userLocation = null;
+        this.map = null;
         this.isAuthenticated = false;
         
         // DOM要素の取得
@@ -25,28 +26,53 @@ class SpotShareApp {
             userMenu: document.getElementById('user-menu'),
             
             // 検索関連
-            searchBtn: document.getElementById('btn-search')
+            searchBtn: document.getElementById('btn-search'),
+            searchInput: document.getElementById('search-input')
         };
-        
-        this.init();
     }
 
-    async init() {
-        console.log('SpotShareApp 初期化中...');
+    /**
+     * map.jsから呼び出される、アプリのメイン処理開始メソッド
+     * @param {*} mapObject - map.jsで作成された地図オブジェクト
+     * @param {*} userLocation - map.jsで取得されたユーザーの位置情報
+     */
+    start(mapObject, userLocation){
+        console.log('SpotShareApp : start() - 地図の準備が完了、アプリを起動します。');
         
+        this.map = mapObject;
+        this.userLocation = userLocation;
+
         // イベントリスナーの設定
         this.setupEventListeners();
         
-        // ユーザー位置情報取得
-        await this.getUserLocation();
-        
         // 認証状態チェック
-        await this.checkAuthStatus();
+        this.checkAuthStatus();
         
         // 初期データ読み込み
-        await this.loadInitialData();
+        this.loadInitialData();
         
         console.log('SpotShareApp 初期化完了');
+    }
+
+    // 認証状態確認
+    async checkAuthStatus() {
+        try {
+            if (api.token) {
+                this.currentUser = await api.getCurrentUser();
+                this.isAuthenticated = true;
+                this.updateUIForAuthenticatedUser();
+                console.log('認証済みユーザー:', this.currentUser.username);
+            } else {
+                this.isAuthenticated = false;
+                this.updateUIForGuestUser();
+                console.log('ゲストユーザー');
+            }
+        } catch (error) {
+            console.warn('認証状態確認エラー:', error);
+            this.isAuthenticated = false;
+            api.clearToken();
+            this.updateUIForGuestUser();
+        }
     }
 
     setupEventListeners() {
@@ -126,27 +152,6 @@ class SpotShareApp {
         }
     }
 
-    // 認証状態確認
-    async checkAuthStatus() {
-        try {
-            if (api.token) {
-                this.currentUser = await api.getCurrentUser();
-                this.isAuthenticated = true;
-                this.updateUIForAuthenticatedUser();
-                console.log('認証済みユーザー:', this.currentUser.username);
-            } else {
-                this.isAuthenticated = false;
-                this.updateUIForGuestUser();
-                console.log('ゲストユーザー');
-            }
-        } catch (error) {
-            console.warn('認証状態確認エラー:', error);
-            this.isAuthenticated = false;
-            api.clearToken();
-            this.updateUIForGuestUser();
-        }
-    }
-
     // 初期データ読み込み
     async loadInitialData() {
         try {
@@ -160,6 +165,7 @@ class SpotShareApp {
             console.error('初期データ読み込みエラー:', error);
         }
     }
+
 
     // おすすめスポット読み込み
     async loadRecommendations() {
@@ -432,8 +438,6 @@ class SpotShareApp {
     }
 }
 
-// アプリケーション初期化
-let app;
 
 document.addEventListener('DOMContentLoaded', () => {
     app = new SpotShareApp();
@@ -451,3 +455,6 @@ window.showLoginModal = () => {
         app.showLoginModal();
     }
 };
+
+
+const app = new SpotShareApp();
