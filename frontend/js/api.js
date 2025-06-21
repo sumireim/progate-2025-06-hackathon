@@ -91,11 +91,6 @@ const googleApi = {
         });
     }
 };
-
-
-
-
-
 // APIを読み込む
 //loadGoogleMapsAPI();
 
@@ -178,9 +173,9 @@ class SpotAPI {
             const response = await fetch(`${this.baseURL}/users/login`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Content-Type': 'application/json',
                 },
-                body: new URLSearchParams({
+                body: JSON.stringify({
                     username: username,
                     password: password
                 })
