@@ -2,6 +2,7 @@ class SpotShareApp {
     constructor() {
         this.currentUser = null;
         this.userLocation = null;
+        this.map = null;
         this.isAuthenticated = false;
         
         //メッセージコンテナ作成
@@ -29,6 +30,19 @@ class SpotShareApp {
             
             // 検索関連
             searchBtn: document.getElementById('btn-search'),
+
+            searchInput: document.getElementById('search-input')
+        };
+    }
+
+    /**
+     * map.jsから呼び出される、アプリのメイン処理開始メソッド
+     * @param {*} mapObject - map.jsで作成された地図オブジェクト
+     * @param {*} userLocation - map.jsで取得されたユーザーの位置情報
+     */
+    start(mapObject, userLocation){
+        console.log('SpotShareApp : start() - 地図の準備が完了、アプリを起動します。');
+
 
             // メッセージコンテナ
             // messageContainer: this.createMessageContainer()
@@ -672,6 +686,7 @@ class SpotShareApp {
         }
     }
 
+
     // おすすめスポット読み込み
     async loadRecommendations() {
         try {
@@ -926,8 +941,6 @@ class SpotShareApp {
     }
 }
 
-// アプリケーション初期化
-let app;
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM loaded, starting app...');
