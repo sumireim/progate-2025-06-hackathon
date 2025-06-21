@@ -33,21 +33,7 @@ class SpotShareApp {
 
             searchInput: document.getElementById('search-input')
         };
-    }
-
-    /**
-     * map.jsから呼び出される、アプリのメイン処理開始メソッド
-     * @param {*} mapObject - map.jsで作成された地図オブジェクト
-     * @param {*} userLocation - map.jsで取得されたユーザーの位置情報
-     */
-    start(mapObject, userLocation){
-        console.log('SpotShareApp : start() - 地図の準備が完了、アプリを起動します。');
-
-
-            // メッセージコンテナ
-            // messageContainer: this.createMessageContainer()
-        };
-        
+    
         this.waitForAPI(); //APIが利用可能になったら初期化
     }
     // APIが利用可能になるまで待機
