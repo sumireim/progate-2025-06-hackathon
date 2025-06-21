@@ -24,19 +24,16 @@ class SpotShareApp {
         this.userLocation = userLocation;
 
         try {
-            await this.auth.checkAuthStatus();
-            this.isAuthenticated = this.auth.isAuthenticated;
-            this.currentUser = this.auth.currentUser;
-
-            if (!this.isAuthenticated) {
-                await this.auth.showWelcomeModal(); 
-                return;
-            }
-            await this.initializeApp();
+            // シンプル化：認証チェックはauth.jsに完全委譲
+            // auth.jsのcheckInitialAuthStatus()が以下を自動で判断・実行する：
+            // - 初回アクセス → ウェルカムモーダル表示
+            // - 2回目以降 → 自動認証 → initializeApp()呼び出し
+            await this.auth.checkInitialAuthStatus();
 
         } catch (error) {
             console.error('アプリ起動プロセスでエラー:', error);
             this.ui.showMessage('アプリの起動に失敗しました。', 'error');
+            await this.auth.showWelcomeModal(); // エラー時も表示
         }
     }
 
@@ -45,53 +42,32 @@ class SpotShareApp {
      */
     async initializeApp() {
         console.log('認証済み - データの初期化を開始します...');
-        this.ui.updateUIForAuthenticatedUser(this.currentUser);
-        await this.loadInitialData();
-        this.ui.showMessage(`ようこそ、${this.currentUser.display_name || this.currentUser.username}さん！`, 'success');
+        if (!this.currentUser) {
+            console.error('ユーザー情報が設定されていません');
+            this.ui.showMessage('ユーザー情報の取得に失敗しました', 'error');
+            await this.auth.showWelcomeModal();
+            return;
+        }
+        
+        try {
+            //認証状態設定
+            this.isAuthenticated = true;
+            console.log('認証状態確定 - this.isAuthenticated:', this.isAuthenticated);
+        
+            this.ui.updateUIForAuthenticatedUser(this.currentUser);
+            await this.loadInitialData();
+            
+            const displayName = this.currentUser?.display_name || 
+                               this.currentUser?.username || 
+                               'ユーザー';
+            
+            this.ui.showMessage(`ようこそ、${displayName}さん！`, 'success');
+            
+        } catch (error) {
+            console.error('アプリ初期化エラー:', error);
+            this.ui.showMessage('アプリの初期化に失敗しました', 'error');
+        }
     }
-
-    /**
-     * イベントリスナーをまとめて設定 (司令塔としての役割)
-     */
-    setupEventListeners() {
-        // 投稿ボタン
-        this.ui.elements.postBtn?.addEventListener('click', () => {
-            this.isAuthenticated ? this.ui.showPostForm() : this.auth.showLoginPrompt();
-        });
-
-        // 投稿フォーム閉じる
-        this.elements.closePostFormBtn?.addEventListener('click', () => {
-            this.hidePostForm();
-        });
-
-        // オーバーレイクリックで閉じる
-        this.elements.postFormOverlay?.addEventListener('click', () => {
-            this.hidePostForm();
-        });
-
-        // 投稿フォーム送信
-        this.elements.postForm?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.handlePostSubmit(e);
-        });
-
-        // ユーザーメニュー
-        this.ui.elements.menuBtn?.addEventListener('click', () => {
-            this.isAuthenticated ? this.ui.toggleUserMenu() : this.auth.showLoginPrompt();
-        });
-
-        // ユーザーメニューオーバーレイ
-        this.elements.userMenuOverlay?.addEventListener('click', () => {
-            this.hideUserMenu();
-        });
-
-        // 検索ボタン
-        this.elements.searchBtn?.addEventListener('click', () => {
-            this.showSearchView();
-        });
-    }
-
-
     /**
      * 初期データをまとめて読み込む
      */
@@ -104,6 +80,79 @@ class SpotShareApp {
             this.loadRecommendations(),
             this.loadRecentPosts()
         ]);
+    }
+
+    /**
+     * イベントリスナーをまとめて設定 (司令塔としての役割)
+     */
+    setupEventListeners() {
+        // 投稿ボタン
+        this.ui.elements.postBtn?.addEventListener('click', () => {
+            if (this.isAuthenticated) {
+                this.ui.showPostForm();
+            } else {
+                // ウェルカムモーダルを表示
+                this.auth.showWelcomeModal();
+            }
+        });
+        // 投稿フォーム送信
+        this.ui.elements.postForm?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handlePostSubmit(e);
+        });
+
+
+        // ユーザーメニュー
+        this.ui.elements.menuBtn?.addEventListener('click', () => {
+            /*if (this.isAuthenticated) {
+                this.ui.toggleUserMenu();
+            } else {
+                // ★修正：ウェルカムモーダルを表示
+                this.auth.showWelcomeModal();
+            }*/
+            this.ui.toggleUserMenu();
+        });
+
+        // 検索ボタン
+        this.ui.elements.searchBtn?.addEventListener('click', () => {
+            if (this.isAuthenticated) {
+                this.showSearchView();
+            } else {
+                // ★修正：ウェルカムモーダルを表示
+                this.auth.showWelcomeModal();
+            }
+        });
+        // ユーザーメニューのナビゲーション 追加
+        this.setupUserMenuNavigation();
+    }
+    //追加
+    setupUserMenuNavigation() {
+        const userMenuList = document.querySelector('.user-menu-list');
+        if (userMenuList) {
+            userMenuList.addEventListener('click', (e) => {
+                const li = e.target.closest('li[data-nav]');
+                if (!li) return;
+                
+                const nav = li.getAttribute('data-nav');
+                switch (nav) {
+                    case 'mypost':
+                        window.location.href = 'my-posts.html';
+                        break;
+                    case 'friends':
+                        window.location.href = 'friends.html';
+                        break;
+                    case 'invite':
+                        window.location.href = 'invite.html';
+                        break;
+                    case 'setting':
+                        window.location.href = 'setting.html';
+                        break;
+                    /*case 'logout':
+                        this.auth.logout();
+                        break;*/
+                }
+            });
+        }
     }
 
     /**
@@ -159,6 +208,14 @@ class SpotShareApp {
             console.error('投稿エラー:', error);
             this.ui.showMessage(`投稿に失敗しました: ${error.message}`, 'error');
         }
+    }
+    /**
+     * 検索画面表示（プレースホルダー）
+     */
+    showSearchView() {
+        console.log('検索画面を表示します');
+        // TODO: 検索画面の実装
+        this.ui.showMessage('検索機能は開発中です', 'info');
     }
 }
 

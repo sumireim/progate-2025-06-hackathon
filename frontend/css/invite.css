@@ -109,6 +109,174 @@
   box-shadow: 0 8px 32px rgba(50,160,130,0.14), 0 2px 8px rgba(0,0,0,0.12);
 }
 
+
+/* 以下追加 */
+
+/* 検索結果 */
+.search-results {
+  margin-top: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  background: var(--card-bg);
+}
+
+.search-results h3 {
+  margin-top: 0;
+  color: var(--text-primary);
+}
+
+.user-item, .request-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.user-info, .request-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  background: var(--accent);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.user-details h4, .request-details h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+}
+
+.user-details p, .request-details p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.invite-btn, .accept-btn, .reject-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.invite-btn {
+  background: var(--accent);
+  color: white;
+}
+
+.accept-btn {
+  background: #28a745;
+  color: white;
+  margin-right: 0.5rem;
+}
+
+.reject-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.status {
+  padding: 0.3rem 0.8rem;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status.friend {
+  background: #28a745;
+  color: white;
+}
+
+.status.pending {
+  background: #ffc107;
+  color: #333;
+}
+
+.status.received {
+  background: #17a2b8;
+  color: white;
+}
+
+.badge {
+  background: #dc3545;
+  color: white;
+  padding: 0.2rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  margin-left: 0.5rem;
+}
+
+.no-results, .no-requests, .loading, .error {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 2rem;
+  font-style: italic;
+}
+
+.error {
+  color: #dc3545;
+}
+
+/* メッセージオーバーレイ */
+.message-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.message-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+}
+
+.message-close {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 0.8rem 2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.requests-section, .sent-requests-section {
+  margin-top: 2rem;
+}
+
+.request-actions {
+  display: flex;
+  align-items: center;
+=======
 .friend-request-section {
   margin-top: 2.5rem;
 }
@@ -190,4 +358,5 @@
   cursor: not-allowed;
   opacity: 0.65;
   box-shadow: none;
+
 }

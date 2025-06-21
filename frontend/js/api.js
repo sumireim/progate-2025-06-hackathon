@@ -7,7 +7,6 @@ class SpotAPI {
         this.currentUser = null;
     }
 
-    // (ここから下に、元のファイルからSpotAPIクラスの全メソッドをコピー＆ペーストしてください)
     // - getAuthHeaders()
     // - setToken()
     // - clearToken()
@@ -37,10 +36,10 @@ class SpotAPI {
     }
 
     // ログアウト
-    clearToken() {
+    /*clearToken() {
         this.token = null;
         localStorage.removeItem('authToken');
-    }
+    }*/
 
     // API接続確認
     async checkConnection() {
@@ -105,6 +104,14 @@ class SpotAPI {
             }
 
             const result = await response.json();
+
+
+            //ユーザー設定永続化
+            const user = result.user || result;
+            if (user) {
+                this.saveUserToStorage(user);
+                console.log('ユーザー情報をローカルストレージに保存:', user);
+            }
             
             // トークンを保存
             if (result.access_token) {
@@ -116,6 +123,26 @@ class SpotAPI {
         } catch (error) {
             console.error('Login error:', error);
             throw error;
+        }
+    }
+
+    // saveUserToStorage メソッドを確認
+    saveUserToStorage(user) {
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        this.currentUser = user;
+        console.log('ユーザー情報をローカルストレージに保存:', user);
+    }
+
+    // loadUserFromStorage メソッドを確認
+    loadUserFromStorage() {
+        try {
+            const userData = localStorage.getItem('currentUser');
+            const user = userData ? JSON.parse(userData) : null;
+            console.log('ローカルストレージからユーザー復元:', user);
+            return user;
+        } catch (error) {
+            console.error('ユーザーデータ読み込みエラー:', error);
+            return null;
         }
     }
 
@@ -383,7 +410,10 @@ class SpotAPI {
     // 受信したフレンド申請一覧
     async getReceivedRequests() {
         try {
-            const response = await fetch(`${this.baseURL}/friends/requests/received`, {
+            const username = this.currentUser?.username || 'aaa';
+            const params = new URLSearchParams({ username });
+            
+            const response = await fetch(`${this.baseURL}/friends/requests/received?${params}`, {
                 headers: this.getAuthHeaders()
             });
 
@@ -401,7 +431,11 @@ class SpotAPI {
     // 送信したフレンド申請一覧
     async getSentRequests() {
         try {
-            const response = await fetch(`${this.baseURL}/friends/requests/sent`, {
+            // 現在のユーザー名をクエリパラメータに追加
+            const username = this.currentUser?.username || 'aaa';
+            const params = new URLSearchParams({ username });
+            
+            const response = await fetch(`${this.baseURL}/friends/requests/sent?${params}`, {
                 headers: this.getAuthHeaders()
             });
 
