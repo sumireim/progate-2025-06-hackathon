@@ -68,3 +68,46 @@
   font-size: 1rem;
   color: var(--text-color);
 }
+
+.submit-btn {
+  display: block;          /* ブロック要素化（横幅効かせる） */
+  width: 50%;              /* 横幅50% */
+  margin-left: 0;          /* 左寄せ */
+  margin-top: 1.2rem;      /* 上に少し余白（お好みで） */
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.7rem 0;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.13rem;
+  cursor: pointer;
+  text-align: center;      /* テキスト中央寄せ */
+}
+
+/* ボタン全般に適用（必要なら.btn-back等にクラス付与でもOK） */
+#btn-back,
+.tab.btn-back {
+  display: inline-block;
+  padding: 0.45em 1.5em;
+  background: linear-gradient(90deg, #F9FCFB 80%, #e3f7f3 100%);
+  color: #208c7c;
+  font-weight: bold;
+  font-size: 1rem;
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 3px 18px rgba(60,180,140,0.12), 0 1px 4px rgba(0,0,0,0.10);
+  cursor: pointer;
+  transition: 
+    background 0.16s, 
+    transform 0.14s, 
+    box-shadow 0.19s;
+  margin: 0.3em 0 0 0;
+}
+
+#btn-back:hover,
+.tab.btn-back:hover {
+  background: linear-gradient(90deg, #e8faf4 70%, #c1e7de 100%);
+  transform: translateY(-1px) scale(1.04);
+  box-shadow: 0 8px 32px rgba(50,160,130,0.14), 0 2px 8px rgba(0,0,0,0.12);
+}

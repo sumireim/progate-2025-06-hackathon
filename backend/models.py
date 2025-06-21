@@ -1,19 +1,25 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, Text, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from database import Base
-from datetime import datetime
+from datetime import datetime, timezone
 
 class User(Base):
-    """ユーザーテーブル"""
+    """
+    ユーザーテーブル
+    # ユーザー登録・ログイン
+    # プロフィール表示
+    - ユーザーの投稿したスポット一覧
+    - 送信した友達申請リスト
+    - 受信した友達申請リスト
+    """
     __tablename__ = "users"
     
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(50), unique=True, index=True, nullable=False)
-    email = Column(String(100), unique=True, index=True, nullable=False)
     hashed_password = Column(String(255), nullable=False)
-    display_name = Column(String(100))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    is_active = Column(Boolean, default=True)
+    display_name = Column(String(100)) # 表示名 補助
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    is_active = Column(Boolean, default=True) # アカウント無効化 補助
     
     # リレーション
     spots = relationship("Spot", back_populates="owner")
@@ -29,22 +35,26 @@ class User(Base):
     )
 
 class Spot(Base):
-    """スポットテーブル"""
+    """
+    スポットテーブル
+    # 地図上にスポット表示
+    # カテゴリ別検索
+    """
     __tablename__ = "spots"
     
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(100), nullable=False)
     description = Column(Text)
-    category = Column(String(50))  # グルメ、観光、ショッピング、エンターテイメント等
+    category = Column(String(50)) 
+    
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
-    rating = Column(Float, default=0)  # 1.0-5.0
+    rating = Column(Float, default=0)  # 1.0-5.0 星評価
     address = Column(String(200))  # 住所
     image_path = Column(String(255))  # 画像ファイルパス
-    is_public = Column(Boolean, default=True)  # 公開/フレンドのみ
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    visibility = Column(String(20), default="friends_only") # 友達だけ
     # 外部キー
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     
@@ -52,44 +62,25 @@ class Spot(Base):
     owner = relationship("User", back_populates="spots")
 
 class Friendship(Base):
-    """フレンド関係テーブル"""
+    """
+    フレンド関係テーブル
+    # 友達申請・承認
+    # 友達一覧表示
+    """
     __tablename__ = "friendships"
     
     id = Column(Integer, primary_key=True, index=True)
     requester_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     requested_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     status = Column(String(20), default="pending")  # pending, accepted, rejected
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
     
     # リレーション
     requester = relationship("User", foreign_keys=[requester_id], back_populates="sent_requests")
     requested = relationship("User", foreign_keys=[requested_id], back_populates="received_requests")
 
-class UserPreference(Base):
-    """ユーザー設定テーブル（AI推薦用）"""
-    __tablename__ = "user_preferences"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    favorite_categories = Column(String(255))  # JSON形式 例: "グルメ,観光,ショッピング"
-    location_range = Column(Float, default=5.0)  # おすすめ検索範囲（km）
-    notification_enabled = Column(Boolean, default=True)  # 通知設定
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-# 今後の拡張用
-class SpotComment(Base):
-    """スポットコメントテーブル"""
-    __tablename__ = "spot_comments"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    spot_id = Column(Integer, ForeignKey("spots.id"), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    comment = Column(Text, nullable=False)
-    rating = Column(Float)  # そのユーザーの評価
-    created_at = Column(DateTime, default=datetime.utcnow)
-
+# 以下これから実装
 class SpotLike(Base):
     """スポットいいねテーブル"""
     __tablename__ = "spot_likes"
@@ -97,7 +88,7 @@ class SpotLike(Base):
     id = Column(Integer, primary_key=True, index=True)
     spot_id = Column(Integer, ForeignKey("spots.id"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
     
     # 複合ユニーク制約（同じユーザーが同じスポットに複数いいね不可）
     __table_args__ = (
