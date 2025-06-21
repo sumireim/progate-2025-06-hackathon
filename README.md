@@ -33,9 +33,12 @@ progete-2025-06-hackathon/
 │   ├── css/                     # スタイルシート
 │   │   └── style.css
 │   ├── js/                      # JavaScript
-│   │   ├── api.js               # API呼び出し処理
-│   │   ├── map.js               # Google Maps統合
-│   │   └── spots.js             # スポット管理機能
+        ├── api.js           # (既存) バックエンドサーバーとの通信
+        ├── googleApi.js     # (既存) Google Maps APIのラッパー
+        ├── map.js           # (既存) 地図の初期化・操作
+        ├── app.js           # (新) アプリ全体の司令塔 (旧spots.jsの核)
+        ├── ui.js            # (新) UIの描画・更新・モーダル表示
+        └── auth.js          # (新) ユーザー認証（ログイン・登録）
 │   └── images/                  # 画像ファイル
 └── data/                        # SQLiteデータベース保存
 
