@@ -383,7 +383,10 @@ class SpotAPI {
     // 受信したフレンド申請一覧
     async getReceivedRequests() {
         try {
-            const response = await fetch(`${this.baseURL}/friends/requests/received`, {
+            const username = this.currentUser?.username || 'aaa';
+            const params = new URLSearchParams({ username });
+            
+            const response = await fetch(`${this.baseURL}/friends/requests/received?${params}`, {
                 headers: this.getAuthHeaders()
             });
 
@@ -401,7 +404,11 @@ class SpotAPI {
     // 送信したフレンド申請一覧
     async getSentRequests() {
         try {
-            const response = await fetch(`${this.baseURL}/friends/requests/sent`, {
+            // 現在のユーザー名をクエリパラメータに追加
+            const username = this.currentUser?.username || 'aaa';
+            const params = new URLSearchParams({ username });
+            
+            const response = await fetch(`${this.baseURL}/friends/requests/sent?${params}`, {
                 headers: this.getAuthHeaders()
             });
 
