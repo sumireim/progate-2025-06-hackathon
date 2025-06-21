@@ -3,16 +3,22 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data/spots.db")
+# 環境変数DATABASE_URLを使う。なければSQLiteをデフォルトに
+DATABASE_URL = os.getenv(
+    "DATABASE_URL", 
+    "sqlite:///./data/spots.db"
+)
 
+# MySQLの場合はconnect_args不要、SQLiteは特別対応
 engine = create_engine(
-    DATABASE_URL, 
-    connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
+    DATABASE_URL,
+    connect_args={"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
+# DBセッション取得用
 def get_db():
     db = SessionLocal()
     try:
@@ -20,13 +26,6 @@ def get_db():
     finally:
         db.close()
 
+# テーブル作成（初回のみ実行）
 def create_tables():
     Base.metadata.create_all(bind=engine)
-    
-
-'''
-# 1. データベース接続設定
-# 2. セッション（DB操作の単位）管理
-# 3. テーブル作成機能
-# 4. API から使いやすい形で提供
-'''
