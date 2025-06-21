@@ -61,7 +61,19 @@ function createMapAndStartApp(centerLocation) {
         new google.maps.Marker({ map: map, position: place.geometry.location });
     });
 
-    // 5. ★★★ 最重要 ★★★
+    //地図上の任意の場所がクリックされた時のイベント
+    map.addListener('click', (event) => {
+        const clickedLatLng = {
+            lat : event.latLng.lat(),
+            lng : eventlatLng.lng()
+        };
+        console.log('地図がクリックされました。',clickedLatLng);
+
+        if(app){
+            app.handleMapClick(clickedLatLng);
+        }
+    });
+
     // すべての地図の準備が完了したら、app.jsが作ったappインスタンスのstartメソッドを呼び出す
     if (app) {
         // 地図オブジェクトと、特定したユーザーの位置情報を渡す
