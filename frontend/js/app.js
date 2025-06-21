@@ -60,17 +60,17 @@ class SpotShareApp {
         });
 
         // 投稿フォーム閉じる
-        this.elements.closePostFormBtn?.addEventListener('click', () => {
+        /*this.elements.closePostFormBtn?.addEventListener('click', () => {
             this.hidePostForm();
         });
 
         // オーバーレイクリックで閉じる
         this.elements.postFormOverlay?.addEventListener('click', () => {
             this.hidePostForm();
-        });
+        });*/
 
         // 投稿フォーム送信
-        this.elements.postForm?.addEventListener('submit', (e) => {
+        this.ui.elements.postForm?.addEventListener('submit', (e) => {
             e.preventDefault();
             this.handlePostSubmit(e);
         });
@@ -81,16 +81,46 @@ class SpotShareApp {
         });
 
         // ユーザーメニューオーバーレイ
-        this.elements.userMenuOverlay?.addEventListener('click', () => {
+        /*this.elements.userMenuOverlay?.addEventListener('click', () => {
             this.hideUserMenu();
-        });
+        });*/
 
         // 検索ボタン
-        this.elements.searchBtn?.addEventListener('click', () => {
+        this.ui.elements.searchBtn?.addEventListener('click', () => {
             this.showSearchView();
         });
+        // ユーザーメニューのナビゲーション 追加
+        this.setupUserMenuNavigation();
     }
-
+    //追加
+    setupUserMenuNavigation() {
+        const userMenuList = document.querySelector('.user-menu-list');
+        if (userMenuList) {
+            userMenuList.addEventListener('click', (e) => {
+                const li = e.target.closest('li[data-nav]');
+                if (!li) return;
+                
+                const nav = li.getAttribute('data-nav');
+                switch (nav) {
+                    case 'mypost':
+                        window.location.href = 'my-posts.html';
+                        break;
+                    case 'friends':
+                        window.location.href = 'friends.html';
+                        break;
+                    case 'invite':
+                        window.location.href = 'invite.html';
+                        break;
+                    case 'setting':
+                        window.location.href = 'setting.html';
+                        break;
+                    case 'logout':
+                        this.auth.logout();
+                        break;
+                }
+            });
+        }
+    }
 
     /**
      * 初期データをまとめて読み込む

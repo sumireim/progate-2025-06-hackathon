@@ -413,22 +413,22 @@ class AuthManager {
 
             // バリデーション
             if (!username) {
-                this.showMessage('ユーザー名を入力してください', 'error');
+                this.ui.showMessage('ユーザー名を入力してください', 'error');
                 return;
             }
 
             if (username.length < 3) {
-                this.showMessage('ユーザー名は3文字以上で入力してください', 'error');
+                this.ui.showMessage('ユーザー名は3文字以上で入力してください', 'error');
                 return;
             }
 
             if (!password) {
-                this.showMessage('パスワードを入力してください', 'error');
+                this.ui.showMessage('パスワードを入力してください', 'error');
                 return;
             }
 
             if (password.length < 6) {
-                this.showMessage('パスワードは6文字以上で入力してください', 'error');
+                this.ui.showMessage('パスワードは6文字以上で入力してください', 'error');
                 return;
             }
 
@@ -439,7 +439,7 @@ class AuthManager {
                 display_name: displayName || username
             };
 
-            this.showMessage('ユーザー登録中...', 'info');
+            this.ui.showMessage('ユーザー登録中...', 'info');
 
             // API呼び出し
             const result = await api.registerUser(userData);
@@ -448,17 +448,17 @@ class AuthManager {
             this.currentUser = result;
             this.isAuthenticated = true;
 
-            this.showMessage('登録が完了しました！アプリを初期化中...', 'success');
+            this.ui.showMessage('登録が完了しました！アプリを初期化中...', 'success');
             
             // モーダルを閉じる
             this.removeModal();
             
             // アプリを初期化
-            await this.initializeApp();
+            await this.app.initializeApp();
             
         } catch (error) {
             console.error('登録エラー:', error);
-            this.showMessage(`登録に失敗しました: ${error.message}`, 'error');
+            this.ui.showMessage(`登録に失敗しました: ${error.message}`, 'error');
         }
     }
 
@@ -469,11 +469,11 @@ class AuthManager {
             const password = document.getElementById('login-password').value;
 
             if (!username || !password) {
-                this.showMessage('ユーザー名とパスワードを入力してください', 'error');
+                this.ui.showMessage('ユーザー名とパスワードを入力してください', 'error');
                 return;
             }
 
-            this.showMessage('ログイン中...', 'info');
+            this.ui.showMessage('ログイン中...', 'info');
             console.log('ログイン試行:', username);
 
             // API呼び出し
@@ -483,18 +483,18 @@ class AuthManager {
             this.currentUser = result.user;
             this.isAuthenticated = true;
 
-            this.showMessage('ログインしました！アプリを初期化中...', 'success');
+            this.ui.showMessage('ログインしました！アプリを初期化中...', 'success');
             
             // モーダルを閉じる
             this.removeModal();
             
             // アプリを初期化
-            await this.initializeApp();
+            await this.app.initializeApp();
             
         } catch (error) {
             console.error('ログインエラー:', error);
             const errorMessage = error.message || error.toString() || 'ログインに失敗しました';
-            this.showMessage(`ログインに失敗しました: ${error.message}`, 'error');
+            this.ui.showMessage(`ログインに失敗しました: ${error.message}`, 'error');
         }
     }
 
