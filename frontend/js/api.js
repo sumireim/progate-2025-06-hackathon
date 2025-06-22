@@ -4,7 +4,7 @@ class SpotAPI {
     constructor() {
         this.baseURL = 'http://localhost:8000/api';
         this.token = localStorage.getItem('authToken');
-        this.currentUser = null;
+        this.currentUser = this.loadUserFromStorage();
     }
 
     // - getAuthHeaders()
@@ -36,11 +36,32 @@ class SpotAPI {
     }
 
     // ログアウト
-    /*clearToken() {
+    clearToken() {
         this.token = null;
+        this.currentUser = null;
         localStorage.removeItem('authToken');
-    }*/
+        localStorage.removeItem('currentUser');
+        console.log('認証情報をクリア');
+    }
+    // ユーザー情報をローカルストレージに保存
+    saveUserToStorage(user) {
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        this.currentUser = user;
+        console.log('ユーザー情報をローカルストレージに保存:', user);
+    }
 
+    // ユーザー情報をローカルストレージから復元
+    loadUserFromStorage() {
+        try {
+            const userData = localStorage.getItem('currentUser');
+            const user = userData ? JSON.parse(userData) : null;
+            console.log('ローカルストレージからユーザー復元:', user);
+            return user;
+        } catch (error) {
+            console.error('ユーザーデータ読み込みエラー:', error);
+            return null;
+        }
+    }
     // API接続確認
     async checkConnection() {
         try {
@@ -71,10 +92,13 @@ class SpotAPI {
 
             const result = await response.json();
             
-            // トークンを保存
+            // トークンとユーザー情報を保存
             if (result.access_token) {
                 this.setToken(result.access_token);
-                this.currentUser = result.user;
+            }
+            
+            if (result.user) {
+                this.saveUserToStorage(result.user);
             }
             
             return result;
@@ -106,17 +130,13 @@ class SpotAPI {
             const result = await response.json();
 
 
-            //ユーザー設定永続化
-            const user = result.user || result;
-            if (user) {
-                this.saveUserToStorage(user);
-                console.log('ユーザー情報をローカルストレージに保存:', user);
-            }
-            
-            // トークンを保存
+            // トークンとユーザー情報を保存
             if (result.access_token) {
                 this.setToken(result.access_token);
-                this.currentUser = result.user;
+            }
+            
+            if (result.user) {
+                this.saveUserToStorage(result.user);
             }
             
             return result;
@@ -126,25 +146,6 @@ class SpotAPI {
         }
     }
 
-    // saveUserToStorage メソッドを確認
-    saveUserToStorage(user) {
-        localStorage.setItem('currentUser', JSON.stringify(user));
-        this.currentUser = user;
-        console.log('ユーザー情報をローカルストレージに保存:', user);
-    }
-
-    // loadUserFromStorage メソッドを確認
-    loadUserFromStorage() {
-        try {
-            const userData = localStorage.getItem('currentUser');
-            const user = userData ? JSON.parse(userData) : null;
-            console.log('ローカルストレージからユーザー復元:', user);
-            return user;
-        } catch (error) {
-            console.error('ユーザーデータ読み込みエラー:', error);
-            return null;
-        }
-    }
 
     // 現在のユーザー情報取得
     async getCurrentUser() {
@@ -157,39 +158,19 @@ class SpotAPI {
                 throw new Error('ユーザー情報の取得に失敗しました');
             }
 
-            return await response.json();
+            const user = await response.json();
+
+            // 取得したユーザー情報を保存
+            this.saveUserToStorage(user);
+
+            return user;
+            
         } catch (error) {
             console.error('ユーザー情報取得エラー:', error);
             throw error;
         }
     }
 
-
-
-    // 近くのスポット検索
-    async getNearbySpots(lat, lng, radius = 5, limit = 10) {
-        try {
-            const params = new URLSearchParams({
-                lat: lat.toString(),
-                lng: lng.toString(),
-                radius: radius.toString(),
-                limit: limit.toString()
-            });
-
-            const response = await fetch(`${this.baseURL}/spots/search/nearby?${params.toString()}`);
-
-            if (!response.ok) {
-                throw new Error('近くのスポット検索に失敗しました');
-            }
-
-            const data = await response.json();
-            console.log('近くのスポット取得:', data.length, '件');
-            return data;
-        } catch (error) {
-            console.error('近くのスポット検索エラー:', error);
-            throw error;
-        }
-    }
 
 
     // おすすめスポット取得
@@ -410,7 +391,11 @@ class SpotAPI {
     // 受信したフレンド申請一覧
     async getReceivedRequests() {
         try {
-            const username = this.currentUser?.username || 'aaa';
+            const username = this.currentUser?.username;
+            if (!username) {
+                throw new Error('ユーザー情報が見つかりません');
+            }
+            
             const params = new URLSearchParams({ username });
             
             const response = await fetch(`${this.baseURL}/friends/requests/received?${params}`, {
@@ -432,7 +417,11 @@ class SpotAPI {
     async getSentRequests() {
         try {
             // 現在のユーザー名をクエリパラメータに追加
-            const username = this.currentUser?.username || 'aaa';
+            const username = this.currentUser?.username;
+            if (!username) {
+                throw new Error('ユーザー情報が見つかりません');
+            }
+            
             const params = new URLSearchParams({ username });
             
             const response = await fetch(`${this.baseURL}/friends/requests/sent?${params}`, {
@@ -453,7 +442,8 @@ class SpotAPI {
     // フレンド申請承認
     async acceptFriendRequest(requestId) {
         try {
-            const response = await fetch(`${this.baseURL}/friends/requests/${requestId}/accept`, {
+            const username = this.currentUser?.username;
+            const response = await fetch(`${this.baseURL}/friends/requests/${requestId}/accept?username=${encodeURIComponent(username)}`, {
                 method: 'POST',
                 headers: this.getAuthHeaders()
             });
@@ -465,7 +455,7 @@ class SpotAPI {
 
             return await response.json();
         } catch (error) {
-            console.error('フレンド申請承認エラー:', error);
+            console.error('フレンド申請承認エラー:', error.message);
             throw error;
         }
     }
@@ -473,7 +463,8 @@ class SpotAPI {
     // フレンド申請拒否
     async rejectFriendRequest(requestId) {
         try {
-            const response = await fetch(`${this.baseURL}/friends/requests/${requestId}/reject`, {
+            const username = this.currentUser?.username;
+            const response = await fetch(`${this.baseURL}/friends/requests/${requestId}/reject?username=${encodeURIComponent(username)}`, {
                 method: 'POST',
                 headers: this.getAuthHeaders()
             });
