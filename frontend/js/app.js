@@ -61,7 +61,7 @@ class SpotShareApp {
                                this.currentUser?.username || 
                                'ユーザー';
             
-            this.ui.showMessage(`ようこそ、${displayName}さん！`, 'success');
+            //this.ui.showMessage(`ようこそ、${displayName}さん！`, 'success');
             
         } catch (error) {
             console.error('アプリ初期化エラー:', error);

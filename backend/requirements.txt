@@ -5,3 +5,4 @@ python-multipart==0.0.6       # ファイルアップロード対応
 python-jose[cryptography]==3.3.0  # JWT 認証
 passlib[bcrypt]==1.7.4        # パスワード暗号化
 python-decouple==3.8          # 環境変数管理
+python-dotenv

@@ -5,7 +5,8 @@ from sqlalchemy import text
 from database import get_db, create_tables
 from sqlalchemy.exc import SQLAlchemyError
 
-
+from dotenv import load_dotenv
+load_dotenv()  # .env ファイルの読み込み
 
 # ルーターのインポート
 from routers import spots, users , friends
@@ -18,7 +19,7 @@ app.add_middleware(
     # allow_origins=["*"], # バックエンドがエラー出すと CORS ヘッダーが出ないことに注意
     # allow_origins=["*"],
     allow_origins=["http://localhost:3000"],
-    allow_credentials=True,
+    # allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -58,19 +59,3 @@ async def health_check(db: Session = Depends(get_db)):
             "database": "disconnected",
             "error": str(e)
         }
-
-# TODO: ルーター追加
-# app.include_router(spots.router)
-# app.include_router(users.router)
-# app.include_router(friends.router)
-
-
-'''
-# 1. 必要なライブラリのインポート
-# 2. FastAPI アプリケーション作成
-# 3. CORS 設定（重要！）
-# 4. 起動時の処理
-# 5. 基本エンドポイント
-# 6. ルーター設定（TODO）
-'''
-

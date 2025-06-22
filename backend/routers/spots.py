@@ -83,15 +83,7 @@ async def get_spots(
     # ページネーション適用
     offset = (page - 1) * per_page
     spots = spots_query.offset(offset).limit(per_page).all()
-    
-    # 距離フィルタリング（位置指定がある場合）
-    if lat is not None and lng is not None and radius is not None:
-        filtered_spots = []
-        for spot in spots:
-            distance = calculate_distance(lat, lng, spot.latitude, spot.longitude)
-            if distance <= radius:
-                filtered_spots.append(spot)
-        spots = filtered_spots
+
     
     return SpotListResponse(
         spots=spots,
@@ -189,35 +181,6 @@ async def delete_spot(spot_id: int, db: Session = Depends(get_db)):
     
     return {"message": "スポットを削除しました"}
 
-@router.get("/search/nearby", response_model=List[SpotResponse])
-async def get_nearby_spots(
-    lat: float = Query(..., description="緯度"),
-    lng: float = Query(..., description="経度"),
-    radius: float = Query(5.0, ge=0.1, le=50, description="検索半径（km）"),
-    limit: int = Query(10, ge=1, le=50),
-    db: Session = Depends(get_db)
-):
-    """近くのスポット検索"""
-    
-    # 全ての公開スポットを取得
-    # spots = db.query(Spot).filter(Spot.is_public == True).all()
-    spots = db.query(Spot).all()
-    
-    # 距離計算してソート
-    spots_with_distance = []
-    for spot in spots:
-        distance = calculate_distance(lat, lng, spot.latitude, spot.longitude)
-        if distance <= radius:
-            spots_with_distance.append((spot, distance))
-    
-    # 距離でソート
-    spots_with_distance.sort(key=lambda x: x[1])
-    
-    # limit適用
-    nearby_spots = [spot for spot, distance in spots_with_distance[:limit]]
-    
-    return nearby_spots
-
 @router.get("/recommend/for-user")
 async def get_recommendations(
     user_lat: float = Query(..., description="ユーザーの緯度"),
@@ -227,35 +190,12 @@ async def get_recommendations(
 ):
     """おすすめスポット取得（簡単ロジック）"""
     
-    # 現在は距離ベースの簡単なロジック
-    # TODO: 後でAI推薦ロジック実装
-    
-    # 近くの高評価スポットを取得
-    spots = db.query(Spot).filter(
-        Spot.is_public == True,
-        Spot.rating >= 3.0
-    ).all()
-    
-    # 距離計算してソート
-    spots_with_distance = []
-    for spot in spots:
-        distance = calculate_distance(user_lat, user_lng, spot.latitude, spot.longitude)
-        # 10km以内 & 評価によるスコア計算
-        if distance <= 10:
-            score = spot.rating * (10 - distance) / 10  # 距離と評価のスコア
-            spots_with_distance.append((spot, score))
-    
-    # スコアでソート（高い順）
-    spots_with_distance.sort(key=lambda x: x[1], reverse=True)
-    
-    # limit適用
-    recommended_spots = [spot for spot, score in spots_with_distance[:limit]]
-    
-    return {
-        "recommendations": recommended_spots,
-        "algorithm": "distance_and_rating_based",
-        "user_location": {"lat": user_lat, "lng": user_lng}
-    }
+    #return {
+    #    "recommendations": recommended_spots,
+    #    "algorithm": "distance_and_rating_based",
+    #    "user_location": {"lat": user_lat, "lng": user_lng}
+    #}
+    pass
 
 @router.get("/categories/")
 async def get_categories(db: Session = Depends(get_db)):
