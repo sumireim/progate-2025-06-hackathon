@@ -192,4 +192,44 @@ class UIManager {
             this.elements.userNameInMenu.textContent = 'ゲスト';
         }
     }
+
+    createInfoWindowContent(data){
+        let contentHTML = '';
+        
+        if(data.place){
+            // POI(店舗など)の情報がある場合
+            const place = data.place;
+            const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}&query_place_id=${place.place_id}`;
+
+            contentHTML = `
+                <div style="font-family: sans-serif;">
+                    <h3 style="margin: 0 0 5px;">${place.name}</h3>
+                    <p style="margin: 0 0 15px; font-size: 13px; color: #555;">${place.formatted_address}</p>
+                    
+                    <a 
+                        href = "${googleMapsUrl}"
+                        target = "_blank"
+                        rel = "noopener noreferrer"
+                        style = "display: block; margin-bottom: 15px; font-size: 13px; text-decolation: none; color: #1a73e8; font-weight: 500;"
+                    >
+                        Googleマップで見る
+                    </a>
+
+                    <button data-action="post-about-place" data-place-id="${place.place_id}" data-place-name="${place.name}" style="width:100%; padding: 8px; cursor: pointer;">
+                        投稿する
+                    </button>
+                </div>`;
+        } else if (data.location) {
+            // 位置情報しかない場合
+            const latLng = data.location;
+            contentHTML = `
+                <div style="font-family: sans-serif;">
+                    <button data-action="post-about-location" data-lat="${latLng.lat}" data-lng="${latLng.lng}" style="width:100%; padding: 8px; cursor: pointer;">
+                        この場所に投稿する
+                    </button>
+                </div>`;
+        }
+
+        return contentHTML;
+    }
 }
