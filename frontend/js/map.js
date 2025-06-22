@@ -75,10 +75,10 @@ function createMapAndStartApp(centerLocation) {
     });
 
     // すべての地図の準備が完了したら、app.jsが作ったappインスタンスのstartメソッドを呼び出す
-    if (app) {
-        // 地図オブジェクトと、特定したユーザーの位置情報を渡す
-        app.start(map, centerLocation);
-    } else {
-        console.error("map.js: SpotShareAppのインスタンス(app)が見つかりません。index.htmlでのスクリプト読み込み順を確認してください。");
-    }
+    // if (app) {
+    //     // 地図オブジェクトと、特定したユーザーの位置情報を渡す
+    //     app.start(map, centerLocation);
+    // } else {
+    //     console.error("map.js: SpotShareAppのインスタンス(app)が見つかりません。index.htmlでのスクリプト読み込み順を確認してください。");
+    // }
 }

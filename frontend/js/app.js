@@ -11,17 +11,15 @@ class SpotShareApp {
         // 各専門家モジュールを初期化
         this.ui = new UIManager();
         this.auth = new AuthManager(this.ui, this); // 依存関係を渡す
-
+        this.start();
         this.setupEventListeners();
     }
 
     /**
      * map.jsから呼び出される、アプリのメイン処理開始メソッド
      */
-    async start(mapObject, userLocation) {
+    async start() {
         console.log('SpotShareApp: start() - メイン処理を開始します');
-        this.map = mapObject;
-        this.userLocation = userLocation;
 
         try {
             // シンプル化：認証チェックはauth.jsに完全委譲
@@ -88,6 +86,7 @@ class SpotShareApp {
     setupEventListeners() {
         // 投稿ボタン
         this.ui.elements.postBtn?.addEventListener('click', () => {
+            console.log('投稿ボタンがクリックされました - isAuthenticated:', this.isAuthenticated);
             if (this.isAuthenticated) {
                 this.ui.showPostForm();
             } else {

@@ -1,3 +1,5 @@
+console.log('nav.js loaded');
+
 document.addEventListener('DOMContentLoaded', () => {
   // ユーザーメニューでの遷移
   const userMenuList = document.querySelector('.user-menu-list');
@@ -30,6 +32,16 @@ document.addEventListener('DOMContentLoaded', () => {
   if (cancelBtn) {
     cancelBtn.addEventListener('click', function(e) {
       e.preventDefault();
+      window.location.href = "index.html";      
+    });
+  }
+  const logoutBtn = document.getElementById('logout-btn');
+  if (logoutBtn) {
+    console.log('ログアウトボタンが見つかりました');
+    logoutBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log('ログアウトボタンがクリックされました');
+      api.clearToken();
       window.location.href = "index.html";
     });
   }
