@@ -7,12 +7,13 @@ class SpotShareApp {
         this.userLocation = null;
         this.map = null;
         this.isAuthenticated = false;
+        this.infoWindow = null;
 
         // 各専門家モジュールを初期化
         this.ui = new UIManager();
         this.auth = new AuthManager(this.ui, this); // 依存関係を渡す
 
-        this.setupEventListeners();
+        this.setupUIEventListeners();
     }
 
     /**
@@ -22,18 +23,27 @@ class SpotShareApp {
         console.log('SpotShareApp: start() - メイン処理を開始します');
         this.map = mapObject;
         this.userLocation = userLocation;
+        this.infoWindow = new google.maps.InfoWindow();
+
+        this.setupMapEventListeners();
 
         try {
             // シンプル化：認証チェックはauth.jsに完全委譲
             // auth.jsのcheckInitialAuthStatus()が以下を自動で判断・実行する：
             // - 初回アクセス → ウェルカムモーダル表示
             // - 2回目以降 → 自動認証 → initializeApp()呼び出し
-            await this.auth.checkInitialAuthStatus();
+            await this.auth.checkAuthStatus();
+            this.isAuthenticated = this.auth.isAuthenticated;
+
+            if(this.isAuthenticated){
+                await this.initializeApp();
+            } else {
+                await this.auth.showWelcomeModal();
+            }
 
         } catch (error) {
             console.error('アプリ起動プロセスでエラー:', error);
             this.ui.showMessage('アプリの起動に失敗しました。', 'error');
-            await this.auth.showWelcomeModal(); // エラー時も表示
         }
     }
 
@@ -58,8 +68,8 @@ class SpotShareApp {
             await this.loadInitialData();
             
             const displayName = this.currentUser?.display_name || 
-                               this.currentUser?.username || 
-                               'ユーザー';
+                                this.currentUser?.username || 
+                                'ユーザー';
             
             //this.ui.showMessage(`ようこそ、${displayName}さん！`, 'success');
             
@@ -85,7 +95,8 @@ class SpotShareApp {
     /**
      * イベントリスナーをまとめて設定 (司令塔としての役割)
      */
-    setupEventListeners() {
+    setupUIEventListeners() {
+        if(!this.ui || !this.ui.elements) return;
         // 投稿ボタン
         this.ui.elements.postBtn?.addEventListener('click', () => {
             if (this.isAuthenticated) {
@@ -125,6 +136,59 @@ class SpotShareApp {
         // ユーザーメニューのナビゲーション 追加
         this.setupUserMenuNavigation();
     }
+
+    setupMapEventListeners(){
+        if(!this.map) return;
+
+        document.getElementById('map').addEventListener('click', (event) => {
+            const target = event.target;
+            if(!target) return;
+            if(target.dataset.action === 'post-about-place'){
+                const placeId = target.dataset.placeId;
+                const placeName = target.dataset.placeName;
+                window.location.href = `post.html?placeId=${placeId}&name=${encodeURIComponent(placeName)}`;
+            } else if(target.dataset.action === 'post-about-location'){
+                const lat = target.dataset.lat;
+                const lng = target.dataset.lng;
+                window.location.href = `post.html?lat=${lat}&lng=${lng}`;
+            }
+        });
+    }
+
+    /**
+     * @param {string} placeId 
+     * @param {google.maps.latLng} position 
+     */
+
+    showCustomInfoWindowForPlace(placeId,position){
+        console.log("到達！！");
+        /** @param {google.maps.places.PlaceResult | null} place */
+        /** @param {google.maps.places.PlacesServiceStatus} status */
+
+        googleApi.placesService.getDetails({ placeId: placeId, field: ['name', 'formatted_address', 'geometry', 'place_id']}, (place,status) => {
+            if(status === google.maps.places.PlacesServiceStatus.OK && place){
+
+                const content = this.ui.createInfoWindowContent({place: place});
+
+                this.infoWindow.close();
+                this.infoWindow.setContent(content);
+                this.infoWindow.setPosition(position);
+                this.infoWindow.open(this.map);
+            }else {
+                this.ui.showMessage('場所の情報を取得できませんでした。', 'error');
+            }
+        });
+    }
+
+    showCustomInfoWindowForLocation(latLng){
+        const content = this.ui.createInfoWindowContent({location: latLng});
+
+        this.infoWindow.close();
+        this.infoWindow.setContent(content);
+        this.infoWindow.setPosition(latLng);
+        this.infoWindow.open(this.map);
+    }
+
     //追加
     setupUserMenuNavigation() {
         const userMenuList = document.querySelector('.user-menu-list');
@@ -219,6 +283,5 @@ class SpotShareApp {
     }
 }
 
-// アプリケーションのインスタンスを生成
-const app = new SpotShareApp();
+
 
