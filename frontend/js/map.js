@@ -1,11 +1,18 @@
 // map.js - 地図の初期化と、アプリ本体(app.js)への処理の引き渡しを担当します
 
+let app;
+
 /**
  * Google Maps APIの準備完了後に呼び出される、すべてが始まる関数
  */
 function initMap() {
-    console.log("map.js: initMap() - Google API準備完了。現在地の取得を開始します...");
+    console.log("map.js: initMap() - Google API準備完了。");
 
+    app = new SpotShareApp();
+    console.log("map.js: appインスタンスを生成しました。");
+
+    console.log("map.js: 現在地の取得を開始します...");
+    
     // googleApi.jsのヘルパー関数を使って現在地を取得
     googleApi.getCurrentLocation(
         // --- 成功時のコールバック ---
@@ -37,6 +44,7 @@ function createMapAndStartApp(centerLocation) {
     const map = new google.maps.Map(document.getElementById("map"), {
         zoom: 15,
         center: centerLocation,
+        clickableIcons: true, //デフォルトの吹き出しは無効化
         disableDefaultUI: true, // デフォルトUIを無効化して見た目をスッキリさせる（任意）
         zoomControl: true,
     });
@@ -52,8 +60,7 @@ function createMapAndStartApp(centerLocation) {
     googleApi.init(map);
     
     // 4. 検索バーにオートコンプリート機能を設定
-    const searchInputId = 'search-input';
-    googleApi.setupAutocomplete(searchInputId, (place) => {
+    googleApi.setupAutocomplete('search-input', (place) => {
         // 場所が選択されたときの処理
         if (!place.geometry || !place.geometry.location) { return; }
         map.setCenter(place.geometry.location);
@@ -61,24 +68,20 @@ function createMapAndStartApp(centerLocation) {
         new google.maps.Marker({ map: map, position: place.geometry.location });
     });
 
-    //地図上の任意の場所がクリックされた時のイベント
-    map.addListener('click', (event) => {
-        const clickedLatLng = {
-            lat : event.latLng.lat(),
-            lng : eventlatLng.lng()
-        };
-        console.log('地図がクリックされました。',clickedLatLng);
 
-        if(app){
-            app.handleMapClick(clickedLatLng);
+    /**
+         * @param {google.maps.MapMouseEvent} event - Googoe Maps APIから渡されるクリックイベントオブジェクト
+         */
+        
+    map.addListener('click', (event) => {
+        if (event.placeId) {
+            event.stop();
+            app.showCustomInfoWindowForPlace(event.placeId, event.latLng);
+        } else {
+            app.showCustomInfoWindowForLocation(event.latLng);
         }
     });
 
     // すべての地図の準備が完了したら、app.jsが作ったappインスタンスのstartメソッドを呼び出す
-    if (app) {
-        // 地図オブジェクトと、特定したユーザーの位置情報を渡す
         app.start(map, centerLocation);
-    } else {
-        console.error("map.js: SpotShareAppのインスタンス(app)が見つかりません。index.htmlでのスクリプト読み込み順を確認してください。");
-    }
 }
