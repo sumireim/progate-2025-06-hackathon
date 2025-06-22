@@ -59,7 +59,7 @@ class AuthManager {
     /**
      * サーバーに認証状態を問い合わせる
      */
-    async checkAuthStatus() {
+    /*async checkAuthStatus() {
         try {
             if (api.token) {
                 this.currentUser = await api.getCurrentUser();
@@ -72,7 +72,7 @@ class AuthManager {
             this.app.isAuthenticated = false;
             api.clearToken();
         }
-    }
+    }*/
 
     /**
      * ログインを促す簡単な確認ダイアログ

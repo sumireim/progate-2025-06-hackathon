@@ -6,7 +6,8 @@ from database import get_db, create_tables
 from sqlalchemy.exc import SQLAlchemyError
 import sqlite3
 
-
+from dotenv import load_dotenv
+load_dotenv()  # .env ファイルの読み込み
 
 # ルーターのインポート
 from routers import spots, users , friends
@@ -19,7 +20,7 @@ app.add_middleware(
     # allow_origins=["*"], # バックエンドがエラー出すと CORS ヘッダーが出ないことに注意
     # allow_origins=["*"],
     allow_origins=["http://localhost:3000"],
-    allow_credentials=True,
+    # allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
