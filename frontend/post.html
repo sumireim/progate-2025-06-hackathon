@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>投稿</title>
+    <link rel="stylesheet" href="css/post.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1 class="app-title">投稿</h1>
+            <nav>
+                <button type="button" id="btn-back" class="tab">← 戻る</button>
+            </nav>
+        </header>
+
+        <main class="app-main" style="flex-direction: column;">
+            <!-- 投稿フォーム -->
+            <section class="post-form-section">
+                <form id="post-form" class="post-form">
+                    <label>
+                        お店の名前
+                        <input type="text" name="shop" required />
+                    </label>
+                    <label>
+                        写真
+                        <input type="file" name="photo" accept="image/*" />
+                    </label>
+                    <label>
+                        カテゴリー
+                        <input type="text" name="category" placeholder="例：カフェ" />
+                    </label>
+                    <div>評価</div>
+                    <div class="star-rating">
+                        <input type="radio" id="star5" name="rating" value="5"><label for="star5">★</label>
+                        <input type="radio" id="star4" name="rating" value="4"><label for="star4">★</label>
+                        <input type="radio" id="star3" name="rating" value="3"><label for="star3">★</label>
+                        <input type="radio" id="star2" name="rating" value="2"><label for="star2">★</label>
+                        <input type="radio" id="star1" name="rating" value="1"><label for="star1">★</label>
+                    </div>
+                    <label>
+                        コメント
+                        <textarea name="comment" rows="3"></textarea>
+                    </label>
+                    <button type="submit" class="submit-btn">投稿する</button>
+                </form>
+            </section>
+        </main>
+    </div>
+    <script src="js/nav.js"></script>
+</body>
+</html>
