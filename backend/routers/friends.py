@@ -1,4 +1,4 @@
-# backend/routers/friends.py を新規作成
+# backend/routers/friends.py 
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
