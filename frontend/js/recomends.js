@@ -1,3 +1,6 @@
+// js/recomends.js
+console.log("recommend.js loaded");
+
 function getStars(rating) {
   const full = Math.floor(rating);
   const half = rating % 1 >= 0.5 ? 1 : 0;
@@ -13,38 +16,44 @@ function genreName(index) {
 const classifier = knnClassifier.create();
 
 // 学習データ（30件分）
-classifier.addExample(tf.tensor([1, 3.0, 4, 0]), "bad");
-classifier.addExample(tf.tensor([2, 3.2, 4, 0]), "bad");
-classifier.addExample(tf.tensor([1, 2.9, 3, 0]), "bad");
-classifier.addExample(tf.tensor([5, 3.4, 3, 0]), "bad");
+classifier.addExample(tf.tensor([1, 1.0, 4, 0]), "bad");
+classifier.addExample(tf.tensor([2, 1.2, 4, 0]), "bad");
+classifier.addExample(tf.tensor([1, 2.1, 3, 0]), "bad");
+classifier.addExample(tf.tensor([5, 1.4, 3, 0]), "bad");
 classifier.addExample(tf.tensor([4, 4.6, 15, 0]), "good");
 classifier.addExample(tf.tensor([0, 4.5, 20, 1]), "good");
 classifier.addExample(tf.tensor([2, 4.8, 18, 1]), "good");
-classifier.addExample(tf.tensor([3, 3.0, 2, 0]), "bad");
-classifier.addExample(tf.tensor([1, 3.5, 6, 0]), "bad");
+classifier.addExample(tf.tensor([3, 0.5, 2, 0]), "bad");
+classifier.addExample(tf.tensor([1, 0.8, 6, 0]), "bad");
 classifier.addExample(tf.tensor([0, 4.3, 12, 0]), "good");
 classifier.addExample(tf.tensor([4, 4.1, 8, 1]), "good");
-classifier.addExample(tf.tensor([3, 3.8, 10, 1]), "good");
+classifier.addExample(tf.tensor([3, 4.8, 10, 1]), "good");
 classifier.addExample(tf.tensor([1, 2.5, 1, 0]), "bad");
-classifier.addExample(tf.tensor([2, 3.6, 5, 0]), "bad");
+classifier.addExample(tf.tensor([2, 1.6, 5, 0]), "bad");
 classifier.addExample(tf.tensor([0, 4.7, 16, 1]), "good");
-classifier.addExample(tf.tensor([1, 3.2, 4, 1]), "bad");
+classifier.addExample(tf.tensor([1, 1.2, 4, 1]), "bad");
 classifier.addExample(tf.tensor([3, 4.0, 11, 1]), "good");
 classifier.addExample(tf.tensor([5, 3.9, 7, 1]), "good");
-classifier.addExample(tf.tensor([6, 3.3, 2, 0]), "bad");
-classifier.addExample(tf.tensor([2, 4.9, 25, 1]), "good");
+classifier.addExample(tf.tensor([6, 2.3, 2, 0]), "bad");
+classifier.addExample(tf.tensor([2, 3.9, 25, 1]), "good");
 classifier.addExample(tf.tensor([0, 4.0, 7, 0]), "good");
-classifier.addExample(tf.tensor([4, 3.5, 6, 0]), "bad");
-classifier.addExample(tf.tensor([3, 3.2, 3, 0]), "bad");
+classifier.addExample(tf.tensor([4, 2.5, 6, 0]), "bad");
+classifier.addExample(tf.tensor([3, 1.2, 3, 0]), "bad");
 classifier.addExample(tf.tensor([1, 4.0, 9, 1]), "good");
 classifier.addExample(tf.tensor([2, 4.2, 14, 1]), "good");
-classifier.addExample(tf.tensor([5, 3.0, 5, 0]), "bad");
-classifier.addExample(tf.tensor([6, 3.6, 5, 0]), "bad");
+classifier.addExample(tf.tensor([5, 1.0, 5, 0]), "bad");
+classifier.addExample(tf.tensor([6, 1.6, 5, 0]), "bad");
 classifier.addExample(tf.tensor([0, 4.9, 30, 1]), "good");
-classifier.addExample(tf.tensor([2, 3.3, 6, 0]), "bad");
+classifier.addExample(tf.tensor([2, 1.3, 6, 0]), "bad");
 classifier.addExample(tf.tensor([1, 3.9, 10, 0]), "good");
 
+// "good"ラベル かつ 評価3.5以上 のみ表示
+function isTrulyGood(label, rating) {
+  return label === "good" && rating >= 3.5;
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
+  console.log("recommend.js DOMContentLoaded");
   const container = document.getElementById("recommend-list");
   container.innerHTML = "";
 
@@ -60,14 +69,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       const result = await classifier.predictClass(input, 5);
       input.dispose();
 
-      if (result.label === "good") {
+      // 判定＋フィルタ
+      if (isTrulyGood(result.label, post.rating)) {
         goodPosts.push(post);
       } else {
         badPosts.push(post);
       }
     }
 
-    const displayPosts = [...goodPosts.slice(0, 5)];
+    // 5件までgoodから優先
+    const displayPosts = goodPosts.slice(0, 5);
     const remaining = 5 - displayPosts.length;
     if (remaining > 0) {
       displayPosts.push(...badPosts.slice(0, remaining));
@@ -84,6 +95,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       `;
       container.appendChild(card);
     }
+
+    // デバッグ用
+    console.log("【good出力】", goodPosts.map(p => `${p.name} (${p.rating})`));
+    console.log("【bad出力】", badPosts.map(p => `${p.name} (${p.rating})`));
 
   } catch (err) {
     console.error("取得失敗:", err);
